@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snapchat/src/data/firebase/firebase_services.dart';
 
 class SignInOptions extends StatelessWidget {
   const SignInOptions({super.key});
@@ -32,17 +33,16 @@ class SignInOptions extends StatelessWidget {
               borderRadius: BorderRadius.circular(48),
               child: ElevatedButton.icon(
                 style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(Colors.white),
+                  backgroundColor: MaterialStatePropertyAll(Color(0xFFFFFFFF)),
                   padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
                       EdgeInsets.only(right: 8)),
                 ),
                 onPressed: () {
-                  print("google");
+                  FirebaseServices.signInwWithGoogle();
                 },
                 icon: const Image(
                   image: AssetImage(
-                    'assets/logos/google_light.png',
-                    package: 'flutter_signin_button',
+                    'assets/images/google.png',
                   ),
                 ),
                 label: const Text(

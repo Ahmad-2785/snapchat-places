@@ -47,3 +47,19 @@
 	<true/>
 </dict>
 </plist>
+
+
+<!-- Google Sign-In section -->
+<key>CFBundleURLTypes</key>
+<array>
+	<dict>
+		<key>CFBundleTypeRole</key>
+		<string>Editor</string>
+		<key>CFBundleURLSchemes</key>
+		<array>
+			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
+			<string>com.googleusercontent.apps.690049084643-okhca3oqle7im5es49vkj7oah28h89oj</string>
+		</array>
+	</dict>
+</array>
+<!-- End of the Google Sign-In section -->

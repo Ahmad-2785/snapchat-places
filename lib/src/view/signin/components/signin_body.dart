@@ -1,14 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl_phone_field/countries.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:snapchat/src/res/app_color.dart';
+import 'package:snapchat/src/res/routes/routes.dart';
+import 'package:snapchat/src/view/signin/components/otp_screen.dart';
 import 'package:snapchat/src/view/signin/components/signin_options.dart';
 
 import 'privacy_policy_link.dart';
 // import 'package:snapchat/src/auth/signin_with_google.dart';
 
-class SignInBody extends StatelessWidget {
+class SignInBody extends StatefulWidget {
   const SignInBody({super.key});
+
+  @override
+  State<SignInBody> createState() => _SignInBodyState();
+}
+
+class _SignInBodyState extends State<SignInBody> {
+  set receivedID(String receivedID) {}
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +26,50 @@ class SignInBody extends StatelessWidget {
     var country =
         countries.firstWhere((element) => element.code == initialCountryCode);
     var isValid = false;
-    void submit(){
-      print(isValid);
+
+    FirebaseAuth auth = FirebaseAuth.instance;
+    // TextEditingController otpController = TextEditingController();
+    String _phoneNumber = '';
+    int? _resendtoken;
+
+    Future<void> getOtp({required String phoneNumber}) async {
+      await auth.verifyPhoneNumber(
+          phoneNumber: phoneNumber,
+          verificationCompleted: (phoneAuthCredential) async {},
+          verificationFailed: (FirebaseAuthException e) {
+            print(e.message);
+          },
+          codeSent: (verificationID, int? resendtoken) async {
+            _resendtoken = resendtoken;
+
+            Map<String, dynamic> data = {
+              'receivedID': verificationID,
+              'resendToken': resendtoken,
+              'phoneNumber': phoneNumber
+            };
+            Get.toNamed(Routes.otpScreen, arguments: data);
+          },
+          forceResendingToken: _resendtoken,
+          timeout: const Duration(seconds: 120),
+          codeAutoRetrievalTimeout: (verificationID) async {});
     }
+
+    void submit() {
+      if (isValid) {
+        getOtp(phoneNumber: _phoneNumber);
+      } else {}
+    }
+
+    // Future<void> verifyOTPCode() async {
+    //   PhoneAuthCredential credential = PhoneAuthProvider.credential(
+    //     verificationId: receivedID,
+    //     smsCode: otpController.text,
+    //   );
+    //   await auth
+    //       .signInWithCredential(credential)
+    //       .then((value) => print('User Login In Successful'));
+    // }
+
     return SingleChildScrollView(
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -52,27 +103,87 @@ class SignInBody extends StatelessWidget {
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w700),
                 ),
+                const Text(
+                  'Enter your phone number',
+                  style: TextStyle(
+                    color: Color(0xFF0F1D27),
+                    fontSize: 16,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeight.w600,
+                    height: 0,
+                  ),
+                ),
                 const SizedBox(
-                  height: 8,
+                  height: 24,
+                ),
+                const SizedBox(
+                  width: 335,
+                  height: 19,
+                  child: Text(
+                    'Phone Number',
+                    style: TextStyle(
+                      color: Color(0xFF3D4850),
+                      fontSize: 14,
+                      fontFamily: 'Lato',
+                      fontWeight: FontWeight.w400,
+                      height: 0,
+                    ),
+                  ),
                 ),
                 IntlPhoneField(
+                  disableLengthCheck: false,
+                  showCursor: false,
+                  keyboardType: TextInputType.phone,
                   autofocus: true,
-                  flagsButtonPadding: const EdgeInsets.all(8),
+                  flagsButtonMargin: const EdgeInsets.only(right: 0),
+                  flagsButtonPadding: const EdgeInsets.only(left: 16),
+                  dropdownIcon: const Icon(
+                    IconData(0xe353, fontFamily: 'MaterialIcons'),
+                    color: Color(0xFFA7ACAF),
+                  ),
                   dropdownIconPosition: IconPosition.trailing,
                   decoration: InputDecoration(
-                    labelText: 'Phone Number',
+                    prefix: Transform(
+                      transform: Matrix4.identity()
+                        ..translate(0.0, 3.0)
+                        ..rotateZ(-1.57),
+                      child: Container(
+                        width: 16,
+                        decoration: const ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              width: 1,
+                              strokeAlign: BorderSide.strokeAlignCenter,
+                              color: Color(0xFFA7ACAF),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    hintStyle: const TextStyle(
+                      color: Color(0xFFA7ACAF),
+                      fontSize: 16,
+                      fontFamily: 'Lato',
+                      fontWeight: FontWeight.w400,
+                      height: 0,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF8F9F9),
+                    hintText: "Phone Number",
+                    labelText: '',
                     border: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.white),
+                      borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
                   initialCountryCode: 'US',
                   onCountryChanged: (country) => country = country,
                   onChanged: (phone) {
+                    _phoneNumber = phone.completeNumber;
                     if (phone.number.length >= country.minLength &&
                         phone.number.length <= country.maxLength) {
-                        isValid = true;
-                    }else{
+                      isValid = true;
+                    } else {
                       isValid = false;
                     }
                   },
@@ -82,7 +193,7 @@ class SignInBody extends StatelessWidget {
                 ),
                 Container(
                   decoration: ShapeDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Color.fromARGB(255, 41, 3, 255),
                     shape: RoundedRectangleBorder(
                       side:
                           const BorderSide(width: 1, color: Color(0xFFECEEEF)),
@@ -106,6 +217,9 @@ class SignInBody extends StatelessWidget {
                       onPressed: () {
                         submit();
                       },
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll(Color(0xFF6155A6))),
                       child: const Text(
                         'Log in',
                         textAlign: TextAlign.center,
@@ -131,7 +245,7 @@ class SignInBody extends StatelessWidget {
                       thickness: 2,
                     )),
                     Text(
-                      'Or sign up with',
+                      'Or log in with',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Color(0xFFA7ACAF),

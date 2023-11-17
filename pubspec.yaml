@@ -16,17 +16,26 @@ dependencies:
   firebase_auth: ^4.13.0
   get: ^4.6.6
   shared_preferences: ^2.2.2
-  intl_phone_field: ^3.2.0
   google_sign_in: ^6.1.6  
   flutter_signin_button: ^2.0.0
   firebase_core: ^2.22.0
-  firebase_database: ^10.3.4
+  firebase_storage: ^11.5.1
+  cloud_firestore: ^4.13.1
+
+  intl_phone_field: ^3.2.0
+  flutter_otp_text_field: ^1.1.1
+  flutter_form_builder: ^9.1.1
+  form_builder_validators: ^9.1.0
+  timer_count_down: ^2.2.2
+  image_picker: ^1.0.4
+
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 
 flutter:

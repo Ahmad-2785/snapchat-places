@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 
-import '../../first_screen.dart';
-import '../../auth/signin_with_google.dart';
-
+import '../../view_model/services/splash_services.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +11,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    SplashServices.checkProfile();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,20 +39,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _signInButton() {
     return SignInButton(
-        Buttons.Apple,
-      onPressed: () {
-        signInWithGoogle().then((result) {
-          if (result != null) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) {
-                  return const FirstScreen();
-                },
-              ),
-            );
-          }
-        });
-      },
+      Buttons.Apple,
+      onPressed: () {},
     );
   }
 }
