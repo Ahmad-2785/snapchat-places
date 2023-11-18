@@ -21,6 +21,10 @@ dependencies:
   firebase_core: ^2.22.0
   firebase_storage: ^11.5.1
   cloud_firestore: ^4.13.1
+  google_maps_flutter: ^2.5.0
+  google_maps: ^6.3.0
+  geolocator: ^10.1.0
+
 
   intl_phone_field: ^3.2.0
   flutter_otp_text_field: ^1.1.1

@@ -11,6 +11,10 @@ import '../shared_pref/shared_pref.dart';
 class FirebaseServices {
   static final FirebaseAuth auth = FirebaseAuth.instance;
 
+  static Future<void> signInWithApple() async {
+    
+  }
+
   static Future<void> signInwWithGoogle() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn();
