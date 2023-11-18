@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:snapchat/src/data/firebase/firebase_services.dart';
 
 class SignInOptions extends StatelessWidget {
@@ -91,7 +92,7 @@ class SignInOptions extends StatelessWidget {
                       EdgeInsets.only(right: 8)),
                 ),
                 onPressed: () {
-                  print("apple");
+                  FirebaseServices.signInWithApple();
                 },
                 icon: const Icon(
                   apple,
