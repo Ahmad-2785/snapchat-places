@@ -53,8 +53,26 @@ class FirebaseServices {
         }
       }).onError((error, stackTrace) {
         Utils.showSnackBar(
-            'Error',
-            Utils.extractFirebaseError(error.toString()),
+            const Text(
+              'Error',
+              style: TextStyle(
+                color: Color(0xFF0F1D27),
+                fontSize: 18,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w600,
+                height: 0,
+              ),
+            ),
+            Text(
+              Utils.extractFirebaseError(error.toString()),
+              style: const TextStyle(
+                color: Color(0xFF566067),
+                fontSize: 14,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w400,
+                height: 0,
+              ),
+            ),
             const Icon(
               IconData(0xf04be, fontFamily: 'MaterialIcons'),
               color: Colors.red,
@@ -63,11 +81,30 @@ class FirebaseServices {
       });
     } catch (e) {
       Utils.showSnackBar(
-          'Error',
-          Utils.extractFirebaseError(e.toString()),
+          const Text(
+            'Error',
+            style: TextStyle(
+              color: Color(0xFF0F1D27),
+              fontSize: 18,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w600,
+              height: 0,
+            ),
+          ),
+          Text(
+            Utils.extractFirebaseError(e.toString()),
+            style: const TextStyle(
+              color: Color(0xFF566067),
+              fontSize: 14,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          ),
           const Icon(
-            IconData(0xf04be, fontFamily: 'MaterialIcons'),
-            color: Colors.red,
+            IconData(0xe237, fontFamily: 'MaterialIcons'),
+            color: Color(0xFFFD363B),
+            size: 20,
           ));
     }
   }
@@ -92,8 +129,26 @@ class FirebaseServices {
             Get.toNamed(Routes.completeProfile);
           }).onError((error, stackTrace) {
             Utils.showSnackBar(
-                'Error',
-                Utils.extractFirebaseError(error.toString()),
+                const Text(
+                  'Error',
+                  style: TextStyle(
+                    color: Color(0xFF0F1D27),
+                    fontSize: 18,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeight.w600,
+                    height: 0,
+                  ),
+                ),
+                Text(
+                  Utils.extractFirebaseError(error.toString()),
+                  style: const TextStyle(
+                    color: Color(0xFF566067),
+                    fontSize: 14,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeight.w400,
+                    height: 0,
+                  ),
+                ),
                 const Icon(
                   IconData(0xf04be, fontFamily: 'MaterialIcons'),
                   color: Colors.red,
@@ -103,8 +158,26 @@ class FirebaseServices {
         }
       }).onError((error, stackTrace) {
         Utils.showSnackBar(
-            'Error',
-            Utils.extractFirebaseError(error.toString()),
+            const Text(
+              'Error',
+              style: TextStyle(
+                color: Color(0xFF0F1D27),
+                fontSize: 18,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w600,
+                height: 0,
+              ),
+            ),
+            Text(
+              Utils.extractFirebaseError(e.toString()),
+              style: const TextStyle(
+                color: Color(0xFF566067),
+                fontSize: 14,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w400,
+                height: 0,
+              ),
+            ),
             const Icon(
               IconData(0xf04be, fontFamily: 'MaterialIcons'),
               color: Colors.red,
@@ -113,8 +186,26 @@ class FirebaseServices {
       });
     } catch (e) {
       Utils.showSnackBar(
-          'Error',
-          Utils.extractFirebaseError(e.toString()),
+          const Text(
+            'Error',
+            style: TextStyle(
+              color: Color(0xFF0F1D27),
+              fontSize: 18,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w600,
+              height: 0,
+            ),
+          ),
+          Text(
+            Utils.extractFirebaseError(e.toString()),
+            style: const TextStyle(
+              color: Color(0xFF566067),
+              fontSize: 14,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          ),
           const Icon(
             IconData(0xf04be, fontFamily: 'MaterialIcons'),
             color: Colors.red,
