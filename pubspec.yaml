@@ -21,7 +21,13 @@ dependencies:
   firebase_core: ^2.22.0
   firebase_storage: ^11.5.1
   cloud_firestore: ^4.13.1
+  crypto: ^3.0.3
+  sign_in_with_apple: ^5.0.0
+  dio: ^5.0.1
+  connectivity_plus: ^5.0.1
   google_maps_flutter: ^2.5.0
+  fluster: ^1.2.0
+  http: ^1.1.0
   google_maps: ^6.3.0
   geolocator: ^10.1.0
 
@@ -51,3 +57,5 @@ flutter:
   assets:
     # Add assets from the images directory to the application.
     - assets/images/
+    - assets/images/markers/
+    - assets/style/

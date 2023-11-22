@@ -34,28 +34,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
   final ImagePicker _picker = ImagePicker();
   File? _imageFile;
 
-  // final picker = ImagePicker();
-
-  // Future uploadImageToFirebase(BuildContext context) async {
-  //   String fileName = basename(_imageFile!.path);
-  //   final firebaseStorageRef =
-  //       FirebaseStorage.instance.ref().child('avatar/$fileName');
-  //   final uploadTask = firebaseStorageRef.putFile(_imageFile!);
-  //   final taskSnapshot = uploadTask.snapshot;
-  //   await taskSnapshot.ref.getDownloadURL().then(
-  //         (value) => print("Done: $value"),
-  //       );
-  // }
-
-  // void _directUpdateImage(File? file) async {
-  //   if (file == null) {
-  //     return;
-  //   } else {
-  //     _imageFile = file;
-  //   }
-  //   setState(() {});
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +43,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                    'assets/images/background.png'), // Replace with your image path
+                    'assets/images/background.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -397,22 +375,8 @@ class _CompleteProfileState extends State<CompleteProfile> {
       }).then((DocumentReference doc) {
         UserPref.setUser(
             uid, doc.id, providerID, username, password, downloadURL);
-        // Utils.showSnackBar(
-        //     'Login',
-        //     'Successfully Login',
-        //     const Icon(
-        //       IconData(0xf04be, fontFamily: 'MaterialIcons'),
-        //       color: Color(0xFF6155A6),
-        //     ));
         Get.toNamed(Routes.homePage);
       }).onError((error, stackTrace) {
-        // Utils.showSnackBar(
-        //     'Error',
-        //     Utils.extractFirebaseError(error.toString()),
-        //     const Icon(
-        //       IconData(0xf04be, fontFamily: 'MaterialIcons'),
-        //       color: Color(0XFFFD363B),
-        //     ));
         return;
       });
     }

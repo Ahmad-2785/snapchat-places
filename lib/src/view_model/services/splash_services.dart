@@ -19,7 +19,7 @@ class SplashServices {
 
   static void checkProfile() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? uid = pref.getString('UID');
+    String? uid = pref.getString('USERID');
     if (uid == null) {
       Get.toNamed(Routes.completeProfile);
     }
