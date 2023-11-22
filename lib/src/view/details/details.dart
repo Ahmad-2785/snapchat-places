@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:snapchat/src/data/google_map/places_services.dart';
+import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
+import 'package:snapchat/src/res/routes/routes.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
@@ -13,11 +14,54 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  final Map<String, dynamic> arguments = Get.arguments;
   int selectedIndex = 0;
+  String placeId = "";
+  String formattedAddress = "";
+  Map<String, dynamic> displayName = {"text": "", "languageCode": "en"};
+  List photos = [];
+  Location location = Location(lat: 0, lng: 0);
+  String photoUri = "";
+  bool openNow = true;
+  List<dynamic> weekdayDescriptions = [];
+
+  Future getPlacedetails(placeId) async {
+    final result = await PlacesServices.getPlaceDetails(placeId);
+    if (result['photos'] == null) {
+    } else {
+      final photoName = result['photos'][0]['name'];
+      final photo = await PlacesServices.getBusinessPhoto(photoName);
+      setState(() {
+        photoUri = photo['photoUri'];
+      });
+    }
+    setState(() {
+      placeId = result['id'];
+      displayName = result['displayName'];
+      formattedAddress = result['shortFormattedAddress'];
+      location = Location(
+          lat: result['location']['latitude'],
+          lng: result['location']['longitude']);
+      if (result['regularOpeningHours'] != null) {
+        openNow = result['regularOpeningHours']['openNow'];
+      }
+      if (result['regularOpeningHours'] != null) {
+        weekdayDescriptions =
+            result['regularOpeningHours']['weekdayDescriptions'];
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getPlacedetails(arguments['placeID']);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SizedBox(
         height: double.infinity,
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -26,17 +70,22 @@ class _DetailPageState extends State<DetailPage> {
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               height: 88,
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Icon(
-                        Icons.arrow_left_sharp,
-                        size: 24,
-                      )),
-                  Expanded(
+                  GestureDetector(
+                    child: const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          Icons.arrow_back_ios,
+                          size: 24,
+                        )),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const Expanded(
                     child: Center(
                       child: Text(
                         'Complete profile',
@@ -50,7 +99,7 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                       width: 48,
                       height: 48,
                       child: Icon(
@@ -60,25 +109,50 @@ class _DetailPageState extends State<DetailPage> {
                 ],
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
             Container(
               padding: const EdgeInsets.only(left: 20, right: 20),
-              height: 76,
+              height: 100,
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  DecoratedBox(
-                    decoration: const BoxDecoration(
+                  Container(
+                    width: 76,
+                    height: 76,
+                    padding: const EdgeInsets.all(2),
+                    decoration: ShapeDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            width: 1, color: Color(0xFFECEEEF)),
+                        borderRadius: BorderRadius.circular(76),
+                      ),
                     ),
-                    child: ClipOval(
-                        child: Image.asset(
-                      'assets/images/logo_white.png',
-                      width: 75,
-                      height: 75,
-                    )),
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: ShapeDecoration(
+                        image: photoUri == ""
+                            ? const DecorationImage(
+                                image: AssetImage(
+                                  'assets/images/logo_white.png',
+                                ),
+                                fit: BoxFit.cover,
+                              )
+                            : DecorationImage(
+                                image: NetworkImage(photoUri),
+                                fit: BoxFit.cover,
+                              ),
+                        shape: const OvalBorder(),
+                        shadows: const [
+                          BoxShadow(
+                            color: Color(0x14014672),
+                            blurRadius: 24,
+                            offset: Offset(0, 4),
+                            spreadRadius: -4,
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(
                     width: 16,
@@ -90,53 +164,43 @@ class _DetailPageState extends State<DetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      const Text(
-                        'Club carbie',
-                        style: TextStyle(
+                      Text(
+                        displayName['text'],
+                        style: const TextStyle(
                           color: Color(0xFF0F1D27),
                           fontSize: 16,
                           fontFamily: 'Inter',
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(
-                        height: 8,
+                      Text(
+                        formattedAddress,
+                        style: const TextStyle(
+                          color: Color(0xFFA7ACAF),
+                          fontSize: 14,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Closed today',
-                            style: TextStyle(
-                              color: Color(0xFFFD363B),
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              height: 0.09,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const ShapeDecoration(
-                              color: Color(0xFFECEEEF),
-                              shape: OvalBorder(),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'San Jose, CA',
-                            style: TextStyle(
-                              color: Color(0xFFA7ACAF),
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              height: 0.09,
-                            ),
-                          )
-                        ],
-                      )
+                      openNow
+                          ? Text(
+                              'Open today',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            )
+                          : const Text(
+                              'Closed today',
+                              style: TextStyle(
+                                color: Color(0xFFFD363B),
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            )
                     ],
                   ))
                 ],
@@ -231,7 +295,10 @@ class _DetailPageState extends State<DetailPage> {
                           padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
                               EdgeInsets.only(right: 24, left: 24)),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.toNamed(Routes.homePage,
+                              arguments: {'location': location});
+                        },
                         // icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -274,7 +341,6 @@ class _DetailPageState extends State<DetailPage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        print('test');
                         selectedIndex = 0;
                       });
                     },
@@ -313,7 +379,6 @@ class _DetailPageState extends State<DetailPage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        print('test1');
                         selectedIndex = 1;
                       });
                     },
@@ -351,7 +416,10 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ),
             Expanded(
-              child: <Widget>[const Stories(), WorkingHours()][selectedIndex],
+              child: <Widget>[
+                const Stories(),
+                WorkingHours(weekdayDescriptions: weekdayDescriptions)
+              ][selectedIndex],
             )
           ],
         ),
@@ -361,9 +429,8 @@ class _DetailPageState extends State<DetailPage> {
 }
 
 class WorkingHours extends StatelessWidget {
-  const WorkingHours({
-    super.key,
-  });
+  const WorkingHours({super.key, required this.weekdayDescriptions});
+  final List<dynamic> weekdayDescriptions;
 
   @override
   Widget build(BuildContext context) {
@@ -379,16 +446,14 @@ class WorkingHours extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
           ),
-          child: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
             //Monday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Monday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -399,10 +464,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Close',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[0].substring(8)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFFFD363B),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[0].substring(8) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -412,14 +482,14 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(color: Color(0xFFECEEEF), thickness: 1),
+            const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Tuesday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Tuesday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -430,10 +500,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Close',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[1].substring(9)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFFFD363B),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[1].substring(9) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -443,14 +518,14 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(color: Color(0xFFECEEEF), thickness: 1),
+            const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Wednesday
             Padding(
               padding: EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Wednesday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -461,10 +536,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '15:00 - 24:00',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[2].substring(11)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF0F1D27),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[2].substring(11) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -474,14 +554,14 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(color: Color(0xFFECEEEF), thickness: 1),
+            const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Thursday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Thursday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -492,10 +572,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '15:00 - 24:00',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[3].substring(10)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF0F1D27),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[3].substring(10) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -505,14 +590,14 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(color: Color(0xFFECEEEF), thickness: 1),
+            const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Friday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Friday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -523,10 +608,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '15:00 - 24:00',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[4].substring(8)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF0F1D27),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[4].substring(8) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -536,14 +626,14 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(color: Color(0xFFECEEEF), thickness: 1),
+            const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Saturday
             Padding(
               padding: EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Saturday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -554,10 +644,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '15:00 - 24:00',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[5].substring(10)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF0F1D27),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[5].substring(10) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -567,14 +662,14 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(color: Color(0xFFECEEEF), thickness: 1),
+            const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Sunday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Sunday',
                     style: TextStyle(
                       color: Color(0xFF70787E),
@@ -585,10 +680,15 @@ class WorkingHours extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '15:00 - 24:00',
+                    weekdayDescriptions.isNotEmpty
+                        ? weekdayDescriptions[6].substring(8)
+                        : "",
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: Color(0xFF0F1D27),
+                      color: weekdayDescriptions.isNotEmpty &&
+                              weekdayDescriptions[6].substring(8) == "Closed"
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF0F1D27),
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,

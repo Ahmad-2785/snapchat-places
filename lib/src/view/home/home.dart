@@ -1,15 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:snapchat/src/res/routes/routes.dart';
+import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
-import 'package:http/http.dart' as http;
 import 'package:snapchat/src/util/reusable_methods.dart';
 
 import '../../../constants/file_constants.dart';
@@ -23,6 +18,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Map<String, Location> receivedLocation =
+      Get.arguments ?? {"location": Location(lat: 0, lng: 0)};
   int _selectedIndex = 0;
 
   late GoogleMapController _mapController;
@@ -31,17 +28,8 @@ class _HomePageState extends State<HomePage> {
 
   CameraPosition currentPos = const CameraPosition(
     target: LatLng(0, 0),
-    zoom: 14,
+    zoom: 15,
   );
-
-  bool _isCameraReCenter = false;
-  CameraPosition initialLocation = const CameraPosition(
-    target: LatLng(40.7128, -24.0060),
-    zoom: 14,
-  );
-
-  static const CameraPosition _kLake = CameraPosition(
-      target: LatLng(40.7128, -24.0060), zoom: 19.151926040649414);
 
   void updateMarkers(CameraPosition position) async {
     double distance = calculateDistance(
@@ -53,7 +41,6 @@ class _HomePageState extends State<HomePage> {
     if (distance < 0.15) {
       return;
     }
-    print("=======================");
     var places = await PlacesServices.getPlaces(position.target, position.zoom);
     for (var place in places) {
       if (_showMarkers.any((marker) => marker.markerId == place['id'])) {
@@ -76,21 +63,35 @@ class _HomePageState extends State<HomePage> {
 
   void goMyLocation() async {
     final mylocation = await PlacesServices.determinePosition();
-    setState(() {
-      initialLocation = CameraPosition(
-          target: LatLng(mylocation.latitude, mylocation.longitude), zoom: 15);
-    });
-    await _mapController.moveCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-            target: LatLng(mylocation.latitude, mylocation.longitude),
-            zoom: 16.5)));
-    print(">>>>>>>>");
-    print(mylocation);
-
     // setState(() {
-    //   initialLocation = CameraPosition(
-    //       target: LatLng(mylocation.latitude, mylocation.longitude));
+    //   currentPos = CameraPosition(
+    //       target: LatLng(mylocation.latitude, mylocation.longitude), zoom: 15);
     // });
+    if (receivedLocation['location']!.lat == 0) {
+      await _mapController.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: LatLng(mylocation.latitude, mylocation.longitude),
+              zoom: 16.5)));
+      Marker myLocationMarker = await PlacesServices.getSpecialMarker(
+          true, mylocation.latitude, mylocation.longitude);
+      setState(() {
+        _showMarkers.add(myLocationMarker);
+      });
+    } else {
+      await _mapController.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: LatLng(receivedLocation['location']!.lat,
+                  receivedLocation['location']!.lng),
+              zoom: 16.5)));
+      Marker newMarker = await PlacesServices.getSpecialMarker(false,
+          receivedLocation['location']!.lat, receivedLocation['location']!.lng);
+      Marker myLocationMarker = await PlacesServices.getSpecialMarker(
+          true, mylocation.latitude, mylocation.longitude);
+      setState(() {
+        _showMarkers.add(newMarker);
+        _showMarkers.add(myLocationMarker);
+      });
+    }
   }
 
   @override
@@ -111,8 +112,8 @@ class _HomePageState extends State<HomePage> {
       body: <Widget>[
         GoogleMap(
           mapType: MapType.normal,
-          myLocationEnabled: true,
-          initialCameraPosition: initialLocation,
+          // myLocationEnabled: true,
+          initialCameraPosition: currentPos,
           onMapCreated: (GoogleMapController controller) {
             _mapController = controller;
             _mapController.setMapStyle(_mapStyle);
@@ -125,21 +126,11 @@ class _HomePageState extends State<HomePage> {
           onCameraMove: (CameraPosition position) {
             updateMarkers(position);
           },
-          onCameraIdle: () {
-            setState(() {
-              _isCameraReCenter = false;
-            });
-          },
           markers: _showMarkers,
         ),
         const SizedBox(),
         const Text('Index 2: School', style: TextStyle(color: Colors.black)),
       ][_selectedIndex],
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
-      ),
       bottomNavigationBar: Container(
         height: 88,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

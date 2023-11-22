@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:snapchat/src/res/routes/routes.dart';
 
 class PlacesServices {
   static Future<Position> determinePosition() async {
@@ -34,6 +36,33 @@ class PlacesServices {
     return await Geolocator.getCurrentPosition();
   }
 
+  static getBusinessPhoto(String photoName) async {
+    String url =
+        'https://places.googleapis.com/v1/$photoName/media?maxHeightPx=100&maxWidthPx=100&key=AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg&skipHttpRedirect=true';
+    http.Response response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print('Request failed with status code ${response.statusCode}');
+    }
+  }
+
+  static getPlaceDetails(String placeId) async {
+    String url = 'https://places.googleapis.com/v1/places/$placeId';
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg',
+      'X-Goog-FieldMask':
+          'id,displayName,photos,shortFormattedAddress,location,regularOpeningHours',
+    };
+    http.Response response = await http.get(Uri.parse(url), headers: headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print('Request failed with status code ${response.statusCode}');
+    }
+  }
+
   static getPlaces(target, zoom) async {
     const String url = 'https://places.googleapis.com/v1/places:searchNearby';
     const String apiKey = 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg';
@@ -48,7 +77,7 @@ class PlacesServices {
             'latitude': target.latitude,
             'longitude': target.longitude
           },
-          'radius': (18 - zoom) * 100.0 + 600.0,
+          'radius': (18 - zoom) * 130.0 + 300.0,
         },
       },
     };
@@ -56,7 +85,7 @@ class PlacesServices {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': apiKey,
       'X-Goog-FieldMask':
-          'places.id,places.primaryType,places.displayName,places.location',
+          'places.id,places.primaryType,places.displayName,places.location,places.primaryTypeDisplayName',
     };
 
     try {
@@ -65,9 +94,7 @@ class PlacesServices {
         headers: headers,
         body: jsonEncode(data),
       );
-      print(">>>>>>>>>>");
-      print(target);
-      print(jsonDecode(response.body)['places']);
+      print(jsonDecode(response.body)['places'].length);
       return jsonDecode(response.body)['places'];
     } catch (e) {
       print('Error: $e');
@@ -95,10 +122,38 @@ class PlacesServices {
       },
       infoWindow: InfoWindow(
           // given title for marker
-          title: place['displayName']['text'],
+          title: place['displayName']['text'] +
+              '>>>>' +
+              placeType +
+              '>>>' +
+              place['primaryType'],
           onTap: () {
-            print(place['location']);
+            Get.toNamed(Routes.details, arguments: {'placeID': place['id']});
           }),
+    );
+
+    return newmarker;
+  }
+
+  static Future<Marker> getSpecialMarker(isMine, langitude, longitude) async {
+    String markerIconUrl = isMine
+        ? 'assets/images/markers/my_location.png'
+        : 'assets/images/markers/targeted_location.png';
+    ByteData data = await rootBundle.load(markerIconUrl);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetHeight: 200);
+    ui.FrameInfo fi = await codec.getNextFrame();
+
+    ByteData? byteData =
+        await fi.image.toByteData(format: ui.ImageByteFormat.png);
+
+    Marker newmarker = Marker(
+      markerId: isMine
+          ? const MarkerId("mylocaation")
+          : const MarkerId("targetedlocation"),
+      position: LatLng(langitude, longitude),
+      icon: BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List()),
+      onTap: () {},
     );
 
     return newmarker;
@@ -106,8 +161,24 @@ class PlacesServices {
 
   static String getMarkerIconUrl(String placeType) {
     switch (placeType) {
-      case 'FoodAndDrink':
-        return 'assets/images/markers/FoodAndDrink.png';
+      case 'Automotive':
+        return 'assets/images/markers/Automotive.png';
+      case 'Entertainment':
+        return 'assets/images/markers/Entertainment.png';
+      case 'Food':
+        return 'assets/images/markers/Food.png';
+      case 'Drink':
+        return 'assets/images/markers/Drink.png';
+      case 'Health':
+        return 'assets/images/markers/Health.png';
+      case 'Lodging':
+        return 'assets/images/markers/Lodging.png';
+      case 'Worship':
+        return 'assets/images/markers/Worship.png';
+      case 'Shopping':
+        return 'assets/images/markers/Shopping.png';
+      case 'Sports':
+        return 'assets/images/markers/Sports.png';
       default:
         return 'assets/images/markers/default.png';
     }
@@ -150,22 +221,24 @@ class PlacesServices {
       'wedding_venue',
       'zoo',
     ];
-    List<String> foodAndDrink = [
+    List<String> drink = [
+      'bar',
+      'coffee_shop',
+      'cafe',
+      'ice_cream_shop',
+    ];
+    List<String> food = [
       'american_restaurant',
       'bakery',
-      'bar',
       'barbecue_restaurant',
       'brazilian_restaurant',
       'breakfast_restaurant',
       'brunch_restaurant',
-      'cafe',
       'chinese_restaurant',
-      'coffee_shop',
       'fast_food_restaurant',
       'french_restaurant',
       'greek_restaurant',
       'hamburger_restaurant',
-      'ice_cream_shop',
       'indian_restaurant',
       'indonesian_restaurant',
       'italian_restaurant',
@@ -297,8 +370,10 @@ class PlacesServices {
       return 'Automotive';
     } else if (entertainment.contains(input)) {
       return 'Entertainment';
-    } else if (foodAndDrink.contains(input)) {
-      return 'FoodAndDrink';
+    } else if (food.contains(input)) {
+      return 'Food';
+    } else if (drink.contains(input)) {
+      return 'Drink';
     } else if (health.contains(input)) {
       return 'Health';
     } else if (lodging.contains(input)) {
@@ -338,6 +413,19 @@ class PlacesServices {
       "postal_code",
       "country",
       "school_district",
+      "airport",
+      "bus_station",
+      "bus_stop",
+      "ferry_terminal",
+      "heliport",
+      "light_rail_station",
+      "park_and_ride",
+      "subway_station",
+      "taxi_stand",
+      "train_station",
+      "transit_depot",
+      "transit_station",
+      "truck_stop",
     ];
   }
 
