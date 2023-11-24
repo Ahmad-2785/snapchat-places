@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:get/get.dart';
@@ -16,7 +17,7 @@ class DisplayPictureScreen extends StatefulWidget {
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
-  Map<String, String> arguments = Get.arguments;
+  Map<String, dynamic> arguments = Get.arguments;
 
   void saveImage() async {
     try {
@@ -38,6 +39,23 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
     } catch (e) {
       print(e);
     }
+  }
+
+  uploadImage() async {
+    final fireUser = FirebaseAuth.instance.currentUser;
+    print(arguments['placeId']);
+    final providerID = fireUser!.providerData[0].providerId;
+    final uid = fireUser.uid;
+    final firebaseStorageRef = FirebaseStorage.instance
+        .ref()
+        .child('stories')
+        .child('${arguments['placeId']}/${DateTime.now()}');
+
+    await firebaseStorageRef.putFile(File(arguments['imagePath']!));
+
+    Future.delayed(Duration.zero, () {
+      Navigator.pop(context);
+    });
   }
 
   @override
@@ -126,7 +144,9 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                     width: 16,
                   ),
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        uploadImage();
+                      },
                       style: const ButtonStyle(
                           padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
                               EdgeInsets.symmetric(horizontal: 24)),

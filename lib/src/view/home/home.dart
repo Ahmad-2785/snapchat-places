@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -8,6 +10,7 @@ import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/util/reusable_methods.dart';
 import 'package:snapchat/src/view/home/camera_screen.dart';
+import "dart:collection";
 
 import '../../../constants/file_constants.dart';
 import '../../view_model/services/splash_services.dart';
@@ -26,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   late GoogleMapController _mapController;
   String _mapStyle = "";
-  Set<Marker> _showMarkers = {};
+  final Set<Marker> _showMarkers = {};
 
   CameraPosition currentPos = const CameraPosition(
     target: LatLng(0, 0),
@@ -34,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   );
   CameraPosition _myLocation =
       const CameraPosition(target: LatLng(0, 0), zoom: 15);
-
+  String _takePhotoPlaceId = "";
   void updateMarkers(CameraPosition position) async {
     double distance = calculateDistance(
       currentPos.target.latitude,
@@ -46,22 +49,24 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     var places = await PlacesServices.getPlaces(position.target, position.zoom);
-    for (var place in places) {
-      if (_showMarkers.any((marker) => marker.markerId == place['id'])) {
-        continue;
+    if (places.isNotEmpty) {
+      for (var place in places) {
+        if (_showMarkers.any((marker) => marker.markerId == place['id'])) {
+          continue;
+        }
+        if (place['primaryType'] == null) {
+          continue;
+        }
+        String placeType = PlacesServices.getPlaceType(place['primaryType']);
+        if (placeType == "Unknown") {
+          continue;
+        }
+        Marker newMarker = await PlacesServices.getMarker(place);
+        setState(() {
+          currentPos = position;
+          _showMarkers.add(newMarker);
+        });
       }
-      if (place['primaryType'] == null) {
-        continue;
-      }
-      String placeType = PlacesServices.getPlaceType(place['primaryType']);
-      if (placeType == "Unknown") {
-        continue;
-      }
-      Marker newMarker = await PlacesServices.getMarker(place);
-      setState(() {
-        currentPos = position;
-        _showMarkers.add(newMarker);
-      });
     }
   }
 
@@ -147,10 +152,12 @@ class _HomePageState extends State<HomePage> {
               final backCameras = cameras
                   .where((cam) => cam.lensDirection == CameraLensDirection.back)
                   .toList();
-              if (backCameras.length > 0) {
-                return CameraScreen(cameraDescription: backCameras[0]);
+              if (backCameras.isNotEmpty) {
+                return CameraScreen(
+                    cameraDescription: backCameras[0],
+                    placeId: _takePhotoPlaceId);
               } else {
-                return Center(
+                return const Center(
                   child: Text("No Camera Found!"),
                 );
               }
@@ -159,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                 child: Text("ERROR : ${snapshot.error}"),
               );
             } else {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(),
               );
             }
@@ -209,12 +216,15 @@ class _HomePageState extends State<HomePage> {
               switch (index) {
                 case 0:
                   if (_selectedIndex == index) {
-                    print('go to my location');
+                    _mapController.moveCamera(
+                        CameraUpdate.newCameraPosition(_myLocation));
                   }
                 case 1:
                   showModal(context);
                 case 2:
-                  showCameraModal(context);
+                  if (_selectedIndex != index) {
+                    showPossiblePositions(context);
+                  }
               }
               if (index == 0) {
                 setState(
@@ -247,24 +257,72 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void showCameraModal(BuildContext context) async {
+  void showPossiblePositions(BuildContext context) async {
     final myLocation = await updateMyLocation();
     final places = await PlacesServices.getTakePicturePlaces(myLocation.target);
-    print(places.length);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-        content: const Text('Example Dialog'),
-        actions: <TextButton>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Close'),
-          )
-        ],
-      ),
-    );
+    var uniqueList = [];
+    if (places.isNotEmpty) {
+      for (var place in places) {
+        if (uniqueList.any((element) => element['id'] == place['id'])) {
+          continue;
+        }
+        uniqueList.add(place);
+      }
+    }
+
+    Future.delayed(Duration.zero, () {
+      showDialog(
+        builder: (BuildContext dialogContext) => AlertDialog(
+          title: const Text("Choose the business"),
+          backgroundColor: Colors.white,
+          content: Container(
+            height: 200.0,
+            width: 300.0,
+            child: uniqueList.isNotEmpty
+                ? ListView.builder(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    shrinkWrap: true,
+                    itemCount: uniqueList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        child: Container(
+                          height: 50,
+                          margin: const EdgeInsets.all(2),
+                          color: const Color(0xFFFFF7FC),
+                          child: Center(
+                              child: Text(
+                                  uniqueList[index]['displayName']['text'],
+                                  style: const TextStyle(
+                                      color: Color(0xFFCC89B4)))),
+                        ),
+                        onTap: () {
+                          setState(
+                            () {
+                              _selectedIndex = 2;
+                              _takePhotoPlaceId = uniqueList[index]['id'];
+                            },
+                          );
+                          Navigator.pop(dialogContext);
+                        },
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Text("There are no businesses around you")),
+          ),
+          actions: <TextButton>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Close'),
+            )
+          ],
+        ),
+        context: context,
+      );
+    });
   }
 
   updateMyLocation() async {

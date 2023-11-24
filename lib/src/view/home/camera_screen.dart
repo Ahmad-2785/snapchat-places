@@ -10,8 +10,10 @@ class CameraScreen extends StatefulWidget {
   const CameraScreen({
     super.key,
     required this.cameraDescription,
+    required this.placeId,
   });
 
+  final placeId;
   final CameraDescription cameraDescription;
 
   @override
@@ -25,7 +27,8 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-
+    print(">>>>>>>");
+    print(widget.placeId);
     _controller = CameraController(
       widget.cameraDescription,
       ResolutionPreset.medium,
@@ -73,7 +76,7 @@ class _CameraScreenState extends State<CameraScreen> {
             
 
                   Get.toNamed(Routes.displayPicureScreen,
-                      arguments: {'imagePath': image.path});
+                      arguments: {'imagePath': image.path, 'placeId': widget.placeId});
                 } catch (e) {
                   print(e);
                 }
