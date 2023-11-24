@@ -30,7 +30,8 @@ dependencies:
   http: ^1.1.0
   google_maps: ^6.3.0
   geolocator: ^10.1.0
-
+  camera: ^0.10.5+5
+  flutter_file_dialog: ^3.0.2
 
   intl_phone_field: ^3.2.0
   flutter_otp_text_field: ^1.1.1
@@ -38,7 +39,7 @@ dependencies:
   form_builder_validators: ^9.1.0
   timer_count_down: ^2.2.2
   image_picker: ^1.0.4
-
+  path_provider: ^2.1.1
   path: ^1.8.3
 
 dev_dependencies:

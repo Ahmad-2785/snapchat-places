@@ -5,4 +5,5 @@ class Routes{
   static const otpScreen='/optScreen';
   static const completeProfile='/completeProfile';
   static const details='/details';
+  static const displayPicureScreen='/displayPicureScreen';
 }

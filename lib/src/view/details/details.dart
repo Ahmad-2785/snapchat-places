@@ -14,6 +14,7 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  late bool isLoading;
   final Map<String, dynamic> arguments = Get.arguments;
   int selectedIndex = 0;
   String placeId = "";
@@ -49,381 +50,390 @@ class _DetailPageState extends State<DetailPage> {
         weekdayDescriptions =
             result['regularOpeningHours']['weekdayDescriptions'];
       }
+      isLoading = false;
     });
   }
 
   @override
   void initState() {
     super.initState();
+    isLoading = true;
     getPlacedetails(arguments['placeID']);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox(
-        height: double.infinity,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              height: 88,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    child: const SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: Icon(
-                          Icons.arrow_back_ios,
-                          size: 24,
-                        )),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'Complete profile',
-                        style: TextStyle(
-                          color: Color(0xFF0F1D27),
-                          fontSize: 18,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w700,
-                          height: 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Icon(
-                        Icons.arrow_left_sharp,
-                        size: 24,
-                      )),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              height: 100,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : SizedBox(
+              height: double.infinity,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
                 children: [
                   Container(
-                    width: 76,
-                    height: 76,
-                    padding: const EdgeInsets.all(2),
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            width: 1, color: Color(0xFFECEEEF)),
-                        borderRadius: BorderRadius.circular(76),
-                      ),
-                    ),
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: ShapeDecoration(
-                        image: photoUri == ""
-                            ? const DecorationImage(
-                                image: AssetImage(
-                                  'assets/images/logo_white.png',
-                                ),
-                                fit: BoxFit.cover,
-                              )
-                            : DecorationImage(
-                                image: NetworkImage(photoUri),
-                                fit: BoxFit.cover,
-                              ),
-                        shape: const OvalBorder(),
-                        shadows: const [
-                          BoxShadow(
-                            color: Color(0x14014672),
-                            blurRadius: 24,
-                            offset: Offset(0, 4),
-                            spreadRadius: -4,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 16,
-                    height: 76,
-                  ),
-                  Expanded(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text(
-                        displayName['text'],
-                        style: const TextStyle(
-                          color: Color(0xFF0F1D27),
-                          fontSize: 16,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        formattedAddress,
-                        style: const TextStyle(
-                          color: Color(0xFFA7ACAF),
-                          fontSize: 14,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      openNow
-                          ? Text(
-                              'Open today',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 14,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            )
-                          : const Text(
-                              'Closed today',
-                              style: TextStyle(
-                                color: Color(0xFFFD363B),
-                                fontSize: 14,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            )
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-
-            // follow and direction button
-            Row(
-              children: [
-                const SizedBox(
-                  width: 20,
-                ),
-                Container(
-                  decoration: ShapeDecoration(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      side:
-                          const BorderSide(width: 1, color: Color(0xFFECEEEF)),
-                      borderRadius: BorderRadius.circular(48),
-                    ),
-                    shadows: const [
-                      BoxShadow(
-                        color: Color(0x05000000),
-                        blurRadius: 16,
-                        offset: Offset(0, 4),
-                        spreadRadius: -4,
-                      )
-                    ],
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  height: 48,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(48),
-                    child: ElevatedButton.icon(
-                      style: const ButtonStyle(
-                        backgroundColor:
-                            MaterialStatePropertyAll(Color(0xFFFFFFFF)),
-                        padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                            EdgeInsets.only(right: 24, left: 24)),
-                      ),
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.favorite_border,
-                        color: Colors.black,
-                      ),
-                      label: const Text(
-                        '362',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF0F1D27),
-                          fontSize: 16,
-                          fontFamily: 'Lato',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 16,
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: ShapeDecoration(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            width: 1, color: Color(0xFFECEEEF)),
-                        borderRadius: BorderRadius.circular(48),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x05000000),
-                          blurRadius: 16,
-                          offset: Offset(0, 4),
-                          spreadRadius: -4,
-                        )
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
+                    padding: const EdgeInsets.all(20),
                     width: double.infinity,
-                    height: 48,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(48),
-                      child: ElevatedButton(
-                        style: const ButtonStyle(
-                          backgroundColor:
-                              MaterialStatePropertyAll(Color(0xFF6155A6)),
-                          padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                              EdgeInsets.only(right: 24, left: 24)),
+                    height: 88,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          child: const SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: Icon(
+                                Icons.arrow_back_ios,
+                                size: 24,
+                              )),
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
                         ),
-                        onPressed: () {
-                          Get.toNamed(Routes.homePage,
-                              arguments: {'location': location});
-                        },
-                        // icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Direction',
-                              textAlign: TextAlign.center,
+                        const Expanded(
+                          child: Center(
+                            child: Text(
+                              'Details',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontFamily: 'Lato',
-                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF0F1D27),
+                                fontSize: 18,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w700,
                                 height: 0,
                               ),
                             ),
-                            SizedBox(
-                              width: 8,
+                          ),
+                        ),
+                        const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Icon(
+                              Icons.arrow_left_sharp,
+                              size: 24,
+                            )),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    height: 120,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 76,
+                          height: 76,
+                          padding: const EdgeInsets.all(2),
+                          decoration: ShapeDecoration(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  width: 1, color: Color(0xFFECEEEF)),
+                              borderRadius: BorderRadius.circular(76),
                             ),
-                            Icon(
-                              Icons.keyboard_arrow_right,
-                              color: Colors.white,
+                          ),
+                          child: Container(
+                            width: 72,
+                            height: 72,
+                            decoration: ShapeDecoration(
+                              image: photoUri == ""
+                                  ? const DecorationImage(
+                                      image: AssetImage(
+                                        'assets/images/logo_white.png',
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : DecorationImage(
+                                      image: NetworkImage(photoUri),
+                                      fit: BoxFit.cover,
+                                    ),
+                              shape: const OvalBorder(),
+                              shadows: const [
+                                BoxShadow(
+                                  color: Color(0x14014672),
+                                  blurRadius: 24,
+                                  offset: Offset(0, 4),
+                                  spreadRadius: -4,
+                                )
+                              ],
                             ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 16,
+                          height: 76,
+                        ),
+                        Expanded(
+                            child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Text(
+                              displayName['text'],
+                              style: const TextStyle(
+                                color: Color(0xFF0F1D27),
+                                fontSize: 16,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              formattedAddress,
+                              style: const TextStyle(
+                                color: Color(0xFFA7ACAF),
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            openNow
+                                ? Text(
+                                    'Open now',
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontSize: 14,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Closed now',
+                                    style: TextStyle(
+                                      color: Color(0xFFFD363B),
+                                      fontSize: 14,
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  )
+                          ],
+                        ))
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+
+                  // follow and direction button
+                  Row(
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      Container(
+                        decoration: ShapeDecoration(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                                width: 1, color: Color(0xFFECEEEF)),
+                            borderRadius: BorderRadius.circular(48),
+                          ),
+                          shadows: const [
+                            BoxShadow(
+                              color: Color(0x05000000),
+                              blurRadius: 16,
+                              offset: Offset(0, 4),
+                              spreadRadius: -4,
+                            )
                           ],
                         ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = 0;
-                      });
-                    },
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                              width: 1,
-                              color: selectedIndex == 0
-                                  ? const Color(0xFF0F1D27)
-                                  : const Color(0xFFECEEEF)),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Stories',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: selectedIndex == 0
-                                ? const Color(0xFF0F1D27)
-                                : const Color(0xFF70787E),
-                            fontSize: 16,
-                            fontFamily: 'Lato',
-                            fontWeight: FontWeight.w600,
-                            height: 0,
+                        clipBehavior: Clip.antiAlias,
+                        height: 48,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(48),
+                          child: ElevatedButton.icon(
+                            style: const ButtonStyle(
+                              backgroundColor:
+                                  MaterialStatePropertyAll(Color(0xFFFFFFFF)),
+                              padding:
+                                  MaterialStatePropertyAll<EdgeInsetsGeometry>(
+                                      EdgeInsets.only(right: 24, left: 24)),
+                            ),
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.favorite_border,
+                              color: Colors.black,
+                            ),
+                            label: const Text(
+                              '362',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFF0F1D27),
+                                fontSize: 16,
+                                fontFamily: 'Lato',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = 1;
-                      });
-                    },
-                    child: Container(
-                      height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                              width: 1,
-                              color: selectedIndex == 1
-                                  ? const Color(0xFF0F1D27)
-                                  : const Color(0xFFECEEEF)),
-                        ),
+                      const SizedBox(
+                        width: 16,
                       ),
-                      child: Center(
-                        child: Text(
-                          'Working hours',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: selectedIndex == 1
-                                ? const Color(0xFF0F1D27)
-                                : const Color(0xFF70787E),
-                            fontSize: 16,
-                            fontFamily: 'Lato',
-                            fontWeight: FontWeight.w600,
-                            height: 0,
+                      Expanded(
+                        child: Container(
+                          decoration: ShapeDecoration(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  width: 1, color: Color(0xFFECEEEF)),
+                              borderRadius: BorderRadius.circular(48),
+                            ),
+                            shadows: const [
+                              BoxShadow(
+                                color: Color(0x05000000),
+                                blurRadius: 16,
+                                offset: Offset(0, 4),
+                                spreadRadius: -4,
+                              )
+                            ],
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          width: double.infinity,
+                          height: 48,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(48),
+                            child: ElevatedButton(
+                              style: const ButtonStyle(
+                                backgroundColor:
+                                    MaterialStatePropertyAll(Color(0xFF6155A6)),
+                                padding: MaterialStatePropertyAll<
+                                        EdgeInsetsGeometry>(
+                                    EdgeInsets.only(right: 24, left: 24)),
+                              ),
+                              onPressed: () {
+                                Get.toNamed(Routes.homePage,
+                                    arguments: {'location': location});
+                              },
+                              // icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Direction',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontFamily: 'Lato',
+                                      fontWeight: FontWeight.w600,
+                                      height: 0,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                  Icon(
+                                    Icons.keyboard_arrow_right,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(
+                        width: 20,
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedIndex = 0;
+                            });
+                          },
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                    width: 1,
+                                    color: selectedIndex == 0
+                                        ? const Color(0xFF0F1D27)
+                                        : const Color(0xFFECEEEF)),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Stories',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: selectedIndex == 0
+                                      ? const Color(0xFF0F1D27)
+                                      : const Color(0xFF70787E),
+                                  fontSize: 16,
+                                  fontFamily: 'Lato',
+                                  fontWeight: FontWeight.w600,
+                                  height: 0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedIndex = 1;
+                            });
+                          },
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                    width: 1,
+                                    color: selectedIndex == 1
+                                        ? const Color(0xFF0F1D27)
+                                        : const Color(0xFFECEEEF)),
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Working hours',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: selectedIndex == 1
+                                      ? const Color(0xFF0F1D27)
+                                      : const Color(0xFF70787E),
+                                  fontSize: 16,
+                                  fontFamily: 'Lato',
+                                  fontWeight: FontWeight.w600,
+                                  height: 0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: <Widget>[
+                      const Stories(),
+                      WorkingHours(weekdayDescriptions: weekdayDescriptions)
+                    ][selectedIndex],
+                  )
+                ],
+              ),
             ),
-            Expanded(
-              child: <Widget>[
-                const Stories(),
-                WorkingHours(weekdayDescriptions: weekdayDescriptions)
-              ][selectedIndex],
-            )
-          ],
-        ),
-      ),
     );
   }
 }

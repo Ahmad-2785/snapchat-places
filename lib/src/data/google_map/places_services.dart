@@ -101,6 +101,43 @@ class PlacesServices {
     }
   }
 
+  static getTakePicturePlaces(target) async {
+    const String url = 'https://places.googleapis.com/v1/places:searchNearby';
+    const String apiKey = 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg';
+    final Map<String, dynamic> data = {
+      "includedPrimaryTypes": includedTypes(),
+      // "excludedPrimaryTypes": excludedTypes(),
+      "maxResultCount": 5,
+      "rankPreference": "DISTANCE",
+      'locationRestriction': {
+        'circle': {
+          'center': {
+            'latitude': target.latitude,
+            'longitude': target.longitude
+          },
+          'radius': 80,
+        },
+      },
+    };
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask':
+          'places.id,places.primaryType,places.displayName,places.location,places.primaryTypeDisplayName',
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+      return jsonDecode(response.body)['places'];
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   static Future<Marker> getMarker(place) async {
     String placeType = PlacesServices.getPlaceType(place['primaryType']);
     String markerIconUrl = getMarkerIconUrl(placeType);
@@ -141,7 +178,7 @@ class PlacesServices {
         : 'assets/images/markers/targeted_location.png';
     ByteData data = await rootBundle.load(markerIconUrl);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetHeight: 200);
+        targetHeight: 200, targetWidth: 200);
     ui.FrameInfo fi = await codec.getNextFrame();
 
     ByteData? byteData =

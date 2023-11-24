@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/util/reusable_methods.dart';
+import 'package:snapchat/src/view/home/camera_screen.dart';
 
 import '../../../constants/file_constants.dart';
 import '../../view_model/services/splash_services.dart';
@@ -30,6 +32,8 @@ class _HomePageState extends State<HomePage> {
     target: LatLng(0, 0),
     zoom: 15,
   );
+  CameraPosition _myLocation =
+      const CameraPosition(target: LatLng(0, 0), zoom: 15);
 
   void updateMarkers(CameraPosition position) async {
     double distance = calculateDistance(
@@ -75,6 +79,9 @@ class _HomePageState extends State<HomePage> {
       Marker myLocationMarker = await PlacesServices.getSpecialMarker(
           true, mylocation.latitude, mylocation.longitude);
       setState(() {
+        _myLocation = CameraPosition(
+            target: LatLng(mylocation.latitude, mylocation.longitude),
+            zoom: 16.5);
         _showMarkers.add(myLocationMarker);
       });
     } else {
@@ -82,12 +89,15 @@ class _HomePageState extends State<HomePage> {
           CameraPosition(
               target: LatLng(receivedLocation['location']!.lat,
                   receivedLocation['location']!.lng),
-              zoom: 16.5)));
+              zoom: 17)));
       Marker newMarker = await PlacesServices.getSpecialMarker(false,
           receivedLocation['location']!.lat, receivedLocation['location']!.lng);
       Marker myLocationMarker = await PlacesServices.getSpecialMarker(
           true, mylocation.latitude, mylocation.longitude);
       setState(() {
+        _myLocation = CameraPosition(
+            target: LatLng(mylocation.latitude, mylocation.longitude),
+            zoom: 16.5);
         _showMarkers.add(newMarker);
         _showMarkers.add(myLocationMarker);
       });
@@ -129,7 +139,32 @@ class _HomePageState extends State<HomePage> {
           markers: _showMarkers,
         ),
         const SizedBox(),
-        const Text('Index 2: School', style: TextStyle(color: Colors.black)),
+        FutureBuilder(
+          future: availableCameras(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final cameras = snapshot.data as List<CameraDescription>;
+              final backCameras = cameras
+                  .where((cam) => cam.lensDirection == CameraLensDirection.back)
+                  .toList();
+              if (backCameras.length > 0) {
+                return CameraScreen(cameraDescription: backCameras[0]);
+              } else {
+                return Center(
+                  child: Text("No Camera Found!"),
+                );
+              }
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text("ERROR : ${snapshot.error}"),
+              );
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        ),
       ][_selectedIndex],
       bottomNavigationBar: Container(
         height: 88,
@@ -178,8 +213,10 @@ class _HomePageState extends State<HomePage> {
                   }
                 case 1:
                   showModal(context);
+                case 2:
+                  showCameraModal(context);
               }
-              if (index != 1) {
+              if (index == 0) {
                 setState(
                   () {
                     _selectedIndex = index;
@@ -208,5 +245,41 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  void showCameraModal(BuildContext context) async {
+    final myLocation = await updateMyLocation();
+    final places = await PlacesServices.getTakePicturePlaces(myLocation.target);
+    print(places.length);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: const Text('Example Dialog'),
+        actions: <TextButton>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Close'),
+          )
+        ],
+      ),
+    );
+  }
+
+  updateMyLocation() async {
+    final mylocation = await PlacesServices.determinePosition();
+    Marker myLocationMarker = await PlacesServices.getSpecialMarker(
+        true, mylocation.latitude, mylocation.longitude);
+    setState(() {
+      _myLocation = CameraPosition(
+          target: LatLng(mylocation.latitude, mylocation.longitude),
+          zoom: 16.5);
+      _showMarkers
+          .removeWhere((element) => element.markerId.value == "mylocaation");
+      _showMarkers.add(myLocationMarker);
+    });
+    return CameraPosition(
+        target: LatLng(mylocation.latitude, mylocation.longitude), zoom: 16.5);
   }
 }

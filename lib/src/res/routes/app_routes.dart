@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:snapchat/src/view/details/details.dart';
+import 'package:snapchat/src/view/home/display_picture_screen.dart';
 import 'package:snapchat/src/view/home/home.dart';
 import 'package:snapchat/src/view/profile/complete_profile.dart';
 import 'package:snapchat/src/view/signin/components/otp_screen.dart';
@@ -18,6 +19,7 @@ class AppRoutes {
           name: Routes.completeProfile, page: () => const CompleteProfile()),
       GetPage(name: Routes.details, page: () => const DetailPage()),
       GetPage(name: Routes.otpScreen, page: () => const OtpScreen()),
+      GetPage(name: Routes.displayPicureScreen, page: () => const DisplayPictureScreen()),
     ];
   }
 }
