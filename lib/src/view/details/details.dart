@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
@@ -19,6 +18,7 @@ class _DetailPageState extends State<DetailPage> {
   int selectedIndex = 0;
   String placeId = "";
   String formattedAddress = "";
+  List<String> storiesURLS = [];
   Map<String, dynamic> displayName = {"text": "", "languageCode": "en"};
   List photos = [];
   Location location = Location(lat: 0, lng: 0);
@@ -27,6 +27,7 @@ class _DetailPageState extends State<DetailPage> {
   List<dynamic> weekdayDescriptions = [];
 
   Future getPlacedetails(placeId) async {
+    //Get place Info from Google API
     final result = await PlacesServices.getPlaceDetails(placeId);
     if (result['photos'] == null) {
     } else {
@@ -36,8 +37,21 @@ class _DetailPageState extends State<DetailPage> {
         photoUri = photo['photoUri'];
       });
     }
+
+    // Get Stories URLS from firestorage
+
+    final storageref =
+        FirebaseStorage.instance.ref().child('stories').child(placeId);
+    final ListResult results = await storageref.listAll();
+    final List<Reference> items = results.items;
+    final List<String> downloadURLS = [];
+    for (var i = 0; i < items.length; i++) {
+      final download = await items[i].getDownloadURL();
+      downloadURLS.add(download);
+    }
     setState(() {
       placeId = result['id'];
+      storiesURLS = downloadURLS;
       displayName = result['displayName'];
       formattedAddress = result['shortFormattedAddress'];
       location = Location(
@@ -427,7 +441,7 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                   Expanded(
                     child: <Widget>[
-                      const Stories(),
+                      Stories(storiesURLS: storiesURLS),
                       WorkingHours(weekdayDescriptions: weekdayDescriptions)
                     ][selectedIndex],
                   )
@@ -531,7 +545,7 @@ class WorkingHours extends StatelessWidget {
             const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Wednesday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -639,7 +653,7 @@ class WorkingHours extends StatelessWidget {
             const Divider(color: Color(0xFFECEEEF), thickness: 1),
             //Saturday
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -718,55 +732,20 @@ class WorkingHours extends StatelessWidget {
 class Stories extends StatefulWidget {
   const Stories({
     super.key,
+    required this.storiesURLS,
   });
-
+  final List<String> storiesURLS;
   @override
   State<Stories> createState() => _StoriesState();
 }
 
 class _StoriesState extends State<Stories> {
-  List<String> testData = [
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/beach-84533_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/brooklyn-bridge-1791001_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/cinque-terre-279013_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/coast-3358820_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/empire-state-building-1081929_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/maldives-1993704_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/new-york-city-336475_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/plouzane-1758197_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/sea-2470908_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/sunset-675847_640.jpg",
-    "https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/surfing-2212948_640.jpg"
-  ];
-
-// Future<List<String>> fetchGalleryData() async {
-//   try {
-//     final response = await http
-//         .get(
-//             'https://kaleidosblog.s3-eu-west-1.amazonaws.com/flutter_gallery/data.json')
-//         .timeout(Duration(seconds: 5));
-
-//     if (response.statusCode == 200) {
-//       return compute(parseGalleryData, response.body);
-//     } else {
-//       throw Exception('Failed to load');
-//     }
-//   } on SocketException catch (e) {
-//     throw Exception('Failed to load');
-//   }
-// }
-
-  List<String> parseGalleryData(String responseBody) {
-    final parsed = List<String>.from(json.decode(responseBody));
-    return parsed;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 12, right: 12, top: 0),
+      padding: const EdgeInsets.only(left: 12, right: 12, top: 0),
       child: FutureBuilder<List<String>>(
-        future: Future.value(testData),
+        future: Future.value(widget.storiesURLS),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return GridView.builder(
@@ -785,7 +764,7 @@ class _StoriesState extends State<Stories> {
                                   fit: BoxFit.cover))));
                 });
           }
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

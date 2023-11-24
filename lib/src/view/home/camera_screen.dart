@@ -13,7 +13,7 @@ class CameraScreen extends StatefulWidget {
     required this.placeId,
   });
 
-  final placeId;
+  final String placeId;
   final CameraDescription cameraDescription;
 
   @override
@@ -27,8 +27,6 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    print(">>>>>>>");
-    print(widget.placeId);
     _controller = CameraController(
       widget.cameraDescription,
       ResolutionPreset.medium,

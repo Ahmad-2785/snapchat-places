@@ -115,7 +115,7 @@ class PlacesServices {
             'latitude': target.latitude,
             'longitude': target.longitude
           },
-          'radius': 80,
+          'radius': 50,
         },
       },
     };
