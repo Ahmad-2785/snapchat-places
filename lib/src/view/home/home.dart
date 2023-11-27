@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
       position.target.latitude,
       position.target.longitude,
     );
-    if (distance < 0.1) {
+    if (distance < 0.05) {
       return;
     }
     var places = await PlacesServices.getPlaces(position.target, position.zoom);
@@ -108,6 +108,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    print(">>>>>>>>>>");
     super.initState();
     SplashServices.checkProfile();
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -124,24 +125,28 @@ class _HomePageState extends State<HomePage> {
       extendBodyBehindAppBar: true,
       extendBody: _extendBody,
       body: <Widget>[
-        GoogleMap(
-          mapType: MapType.normal,
-          zoomControlsEnabled: false,
-          // myLocationEnabled: true,
-          initialCameraPosition: currentPos,
-          onMapCreated: (GoogleMapController controller) {
-            _mapController = controller;
-            _mapController.setMapStyle(_mapStyle);
-          },
-          minMaxZoomPreference: const MinMaxZoomPreference(14, 20),
-          mapToolbarEnabled: false,
-          onTap: (LatLng latLng) {
-            print(latLng);
-          },
-          onCameraMove: (CameraPosition position) {
-            updateMarkers(position);
-          },
-          markers: _showMarkers,
+        Stack(
+          children: [
+            GoogleMap(
+              mapType: MapType.normal,
+              zoomControlsEnabled: false,
+              // myLocationEnabled: true,
+              initialCameraPosition: currentPos,
+              onMapCreated: (GoogleMapController controller) {
+                _mapController = controller;
+                _mapController.setMapStyle(_mapStyle);
+              },
+              minMaxZoomPreference: const MinMaxZoomPreference(14, 20),
+              mapToolbarEnabled: false,
+              onTap: (LatLng latLng) {
+                print(latLng);
+              },
+              onCameraMove: (CameraPosition position) {
+                updateMarkers(position);
+              },
+              markers: _showMarkers,
+            ),
+          ],
         ),
         const SizedBox(),
         FutureBuilder(

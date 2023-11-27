@@ -21,7 +21,7 @@ class SplashServices {
 
   static void checkProfile() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? uid = pref.getString('USERID');
+    String? uid = pref.getString('USERNAME');
     if (uid == null) {
       Get.off(() => const CompleteProfile());
     }
