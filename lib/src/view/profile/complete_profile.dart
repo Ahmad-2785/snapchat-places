@@ -42,8 +42,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/background.png'),
+                image: AssetImage('assets/images/background.png'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -351,14 +350,31 @@ class _CompleteProfileState extends State<CompleteProfile> {
     );
   }
 
+  Future<bool> isUsernameTaken(String username) async {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('username', isEqualTo: username)
+        .get();
+
+    return snapshot.docs.isNotEmpty;
+  }
+
   void completeProfile() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
-      // _formKey.currentState?.fields['username']
-      //     ?.invalidate('Username already taken.');
       final fireUser = FirebaseAuth.instance.currentUser;
       final providerID = fireUser!.providerData[0].providerId;
       final uid = fireUser.uid;
       final username = _formKey.currentState?.value['username'];
+      bool isTaken = await isUsernameTaken(username);
+      print(">>>>>>>>");
+      print(isTaken);
+      if (isTaken) {
+        _formKey.currentState?.fields['username']
+            ?.invalidate('Username already taken.');
+        setState(() {});
+        return;
+      }
+      print("<<<<<<<<<");
       final password = _formKey.currentState?.value['password'];
       String extenstion = extension(_imageFile!.path);
       final firebaseStorageRef =

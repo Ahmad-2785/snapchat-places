@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
 import 'package:snapchat/src/util/utils.dart';
+import 'package:snapchat/src/view/profile/complete_profile.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 
@@ -68,7 +69,7 @@ class _OtpScreenState extends State<OtpScreen> {
             const SizedBox(
               height: 24,
             ),
-      
+
             // Page Title
             const Text(
               'Verify',
@@ -88,7 +89,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 height: 0,
               ),
             ),
-      
+
             // Help Text
             Text(
               "${phoneNumber.substring(0, 2)} ${phoneNumber.substring(2, 5)} ${phoneNumber.substring(5, 8)} ${phoneNumber.substring(8, 11)}",
@@ -101,7 +102,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
             ),
             const SizedBox(height: 24),
-      
+
             // Verification Code Textfield
             SizedBox(
               height: 48,
@@ -115,15 +116,12 @@ class _OtpScreenState extends State<OtpScreen> {
                 fieldWidth: 48,
                 filled: true,
                 fillColor: const Color(0xFFF8F9F9),
-                borderColor: isError
-                    ? const Color(0xFFFD363B)
-                    : const Color(0xFFF8F9F9),
-                enabledBorderColor: isError
-                    ? const Color(0xFFFD363B)
-                    : const Color(0xFFF8F9F9),
-                focusedBorderColor: isError
-                    ? const Color(0xFFFD363B)
-                    : const Color(0xFFF8F9F9),
+                borderColor:
+                    isError ? const Color(0xFFFD363B) : const Color(0xFFF8F9F9),
+                enabledBorderColor:
+                    isError ? const Color(0xFFFD363B) : const Color(0xFFF8F9F9),
+                focusedBorderColor:
+                    isError ? const Color(0xFFFD363B) : const Color(0xFFF8F9F9),
                 borderWidth: 1,
                 textStyle: TextStyle(
                   color: isError
@@ -136,7 +134,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
             ),
             const SizedBox(height: 24),
-      
+
             // Verify Button
             Container(
               decoration: ShapeDecoration(
@@ -185,7 +183,7 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
             ),
             const SizedBox(height: 16),
-      
+
             // Resend Verification Button
             Builder(builder: (context) {
               if (resned2) {
@@ -229,14 +227,13 @@ class _OtpScreenState extends State<OtpScreen> {
                               build: (_, double time) => Text(
                                 formatTime(time),
                                 style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontSize: 16,
                                   fontFamily: 'Lato',
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              interval: Duration(milliseconds: 1000),
+                              interval: const Duration(milliseconds: 1000),
                               onFinished: () {
                                 setState(() {
                                   resned2 = false;
@@ -253,8 +250,8 @@ class _OtpScreenState extends State<OtpScreen> {
                 return Container(
                   decoration: ShapeDecoration(
                     shape: RoundedRectangleBorder(
-                      side: const BorderSide(
-                          width: 1, color: Color(0xFFEFEEF6)),
+                      side:
+                          const BorderSide(width: 1, color: Color(0xFFEFEEF6)),
                       borderRadius: BorderRadius.circular(48),
                     ),
                   ),
@@ -299,7 +296,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
       if (authCred.user != null) {
         print("signin success");
-        Get.toNamed(Routes.completeProfile);
+        Get.offAll(() => const CompleteProfile());
       }
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
