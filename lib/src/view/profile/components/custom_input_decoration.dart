@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-InputDecoration CustomInputDecoration(String hintText, Icon prefixIcon) {
+InputDecoration CustomInputDecoration(String hintText, Icon prefixIcon,
+    {fillColor = 0xFFF8F9F9}) {
   return InputDecoration(
     contentPadding: EdgeInsets.all(14),
     prefix: Transform(
@@ -35,6 +36,6 @@ InputDecoration CustomInputDecoration(String hintText, Icon prefixIcon) {
       borderRadius: BorderRadius.circular(50),
     ),
     filled: true,
-    fillColor: const Color(0xFFF8F9F9),
+    fillColor: fillColor,
   );
 }

@@ -63,6 +63,34 @@ class PlacesServices {
     }
   }
 
+  static getPlacesBySearch(text) async {
+    const String url = 'https://places.googleapis.com/v1/places:searchText';
+    const String apiKey = 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg';
+    final Map<String, dynamic> data = {
+      "textQuery": text,
+      // "excludedPrimaryTypes": excludedTypes(),
+      "maxResultCount": 20,
+      "rankPreference": "DISTANCE",
+    };
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask':
+          'places.id,places.displayName,places.primaryType,places.photos,places.shortFormattedAddress',
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data),
+      );
+      return jsonDecode(response.body)['places'];
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   static getPlaces(target, zoom) async {
     const String url = 'https://places.googleapis.com/v1/places:searchNearby';
     const String apiKey = 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg';
@@ -85,7 +113,7 @@ class PlacesServices {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': apiKey,
       'X-Goog-FieldMask':
-          'places.id,places.primaryType,places.displayName,places.location,places.primaryTypeDisplayName',
+          'places.id,places.primaryType,places.displayName,places.location',
     };
 
     try {
@@ -94,7 +122,6 @@ class PlacesServices {
         headers: headers,
         body: jsonEncode(data),
       );
-      print(jsonDecode(response.body)['places'].length);
       return jsonDecode(response.body)['places'];
     } catch (e) {
       print('Error: $e');
@@ -115,7 +142,7 @@ class PlacesServices {
             'latitude': target.latitude,
             'longitude': target.longitude
           },
-          'radius': 50,
+          'radius': 50.0,
         },
       },
     };
@@ -123,7 +150,7 @@ class PlacesServices {
       'Content-Type': 'application/json',
       'X-Goog-Api-Key': apiKey,
       'X-Goog-FieldMask':
-          'places.id,places.primaryType,places.displayName,places.location,places.primaryTypeDisplayName',
+          'places.id,places.displayName,places.primaryType,places.photos,places.shortFormattedAddress',
     };
 
     try {
@@ -159,11 +186,7 @@ class PlacesServices {
       },
       infoWindow: InfoWindow(
           // given title for marker
-          title: place['displayName']['text'] +
-              '>>>>' +
-              placeType +
-              '>>>' +
-              place['primaryType'],
+          title: place['displayName']['text'],
           onTap: () {
             Get.toNamed(Routes.details, arguments: {'placeID': place['id']});
           }),

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -9,8 +7,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/util/reusable_methods.dart';
+import 'package:snapchat/src/view/home/business_card.dart';
 import 'package:snapchat/src/view/home/camera_screen.dart';
-import "dart:collection";
+import 'package:snapchat/src/view/home/place_search_menu.dart';
 
 import '../../../constants/file_constants.dart';
 import '../../view_model/services/splash_services.dart';
@@ -26,7 +25,8 @@ class _HomePageState extends State<HomePage> {
   Map<String, Location> receivedLocation =
       Get.arguments ?? {"location": Location(lat: 0, lng: 0)};
   int _selectedIndex = 0;
-
+  var _zoom = 16.5;
+  bool _extendBody = true;
   late GoogleMapController _mapController;
   String _mapStyle = "";
   final Set<Marker> _showMarkers = {};
@@ -35,8 +35,7 @@ class _HomePageState extends State<HomePage> {
     target: LatLng(0, 0),
     zoom: 15,
   );
-  CameraPosition _myLocation =
-      const CameraPosition(target: LatLng(0, 0), zoom: 15);
+  LatLng _myLocation = const LatLng(0, 0);
   String _takePhotoPlaceId = "";
   void updateMarkers(CameraPosition position) async {
     double distance = calculateDistance(
@@ -45,7 +44,7 @@ class _HomePageState extends State<HomePage> {
       position.target.latitude,
       position.target.longitude,
     );
-    if (distance < 0.15) {
+    if (distance < 0.1) {
       return;
     }
     var places = await PlacesServices.getPlaces(position.target, position.zoom);
@@ -62,7 +61,9 @@ class _HomePageState extends State<HomePage> {
           continue;
         }
         Marker newMarker = await PlacesServices.getMarker(place);
+        final zoom = await _mapController.getZoomLevel();
         setState(() {
+          _zoom = zoom;
           currentPos = position;
           _showMarkers.add(newMarker);
         });
@@ -80,13 +81,11 @@ class _HomePageState extends State<HomePage> {
       await _mapController.moveCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
               target: LatLng(mylocation.latitude, mylocation.longitude),
-              zoom: 16.5)));
+              zoom: _zoom)));
       Marker myLocationMarker = await PlacesServices.getSpecialMarker(
           true, mylocation.latitude, mylocation.longitude);
       setState(() {
-        _myLocation = CameraPosition(
-            target: LatLng(mylocation.latitude, mylocation.longitude),
-            zoom: 16.5);
+        _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
         _showMarkers.add(myLocationMarker);
       });
     } else {
@@ -94,15 +93,13 @@ class _HomePageState extends State<HomePage> {
           CameraPosition(
               target: LatLng(receivedLocation['location']!.lat,
                   receivedLocation['location']!.lng),
-              zoom: 17)));
+              zoom: 19)));
       Marker newMarker = await PlacesServices.getSpecialMarker(false,
           receivedLocation['location']!.lat, receivedLocation['location']!.lng);
       Marker myLocationMarker = await PlacesServices.getSpecialMarker(
           true, mylocation.latitude, mylocation.longitude);
       setState(() {
-        _myLocation = CameraPosition(
-            target: LatLng(mylocation.latitude, mylocation.longitude),
-            zoom: 16.5);
+        _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
         _showMarkers.add(newMarker);
         _showMarkers.add(myLocationMarker);
       });
@@ -124,9 +121,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      extendBody: _extendBody,
       body: <Widget>[
         GoogleMap(
           mapType: MapType.normal,
+          zoomControlsEnabled: false,
           // myLocationEnabled: true,
           initialCameraPosition: currentPos,
           onMapCreated: (GoogleMapController controller) {
@@ -215,9 +215,15 @@ class _HomePageState extends State<HomePage> {
             onTap: (int index) {
               switch (index) {
                 case 0:
+                  setState(() {
+                    _extendBody = true;
+                  });
                   if (_selectedIndex == index) {
-                    _mapController.moveCamera(
-                        CameraUpdate.newCameraPosition(_myLocation));
+                    _mapController.moveCamera(CameraUpdate.newCameraPosition(
+                        CameraPosition(
+                            target: LatLng(
+                                _myLocation.latitude, _myLocation.longitude),
+                            zoom: _zoom)));
                   }
                 case 1:
                   showModal(context);
@@ -241,19 +247,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showModal(BuildContext context) {
-    showDialog<void>(
+    showModalBottomSheet(
+      backgroundColor: const Color(0xFFF8F9F9),
+      elevation: 0,
+      isScrollControlled: true,
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        content: const Text('Example Dialog'),
-        actions: <TextButton>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Close'),
-          )
-        ],
-      ),
+      builder: (BuildContext context) {
+        return const PlaceSearchMenu();
+      },
     );
   }
 
@@ -261,7 +262,7 @@ class _HomePageState extends State<HomePage> {
     final myLocation = await updateMyLocation();
     final places = await PlacesServices.getTakePicturePlaces(myLocation.target);
     var uniqueList = [];
-    if (places.isNotEmpty) {
+    if (places != null) {
       for (var place in places) {
         if (uniqueList.any((element) => element['id'] == place['id'])) {
           continue;
@@ -271,56 +272,75 @@ class _HomePageState extends State<HomePage> {
     }
 
     Future.delayed(Duration.zero, () {
-      showDialog(
-        builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text("Choose the business"),
-          backgroundColor: Colors.white,
-          content: Container(
-            height: 200.0,
-            width: 300.0,
-            child: uniqueList.isNotEmpty
-                ? ListView.builder(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-                    shrinkWrap: true,
-                    itemCount: uniqueList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return GestureDetector(
-                        child: Container(
-                          height: 50,
-                          margin: const EdgeInsets.all(2),
-                          color: const Color(0xFFFFF7FC),
-                          child: Center(
-                              child: Text(
-                                  uniqueList[index]['displayName']['text'],
-                                  style: const TextStyle(
-                                      color: Color(0xFFCC89B4)))),
-                        ),
-                        onTap: () {
-                          setState(
-                            () {
-                              _selectedIndex = 2;
-                              _takePhotoPlaceId = uniqueList[index]['id'];
-                            },
-                          );
-                          Navigator.pop(dialogContext);
-                        },
-                      );
-                    },
-                  )
-                : const Center(
-                    child: Text("There are no businesses around you")),
-          ),
-          actions: <TextButton>[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('Close'),
-            )
-          ],
-        ),
+      showModalBottomSheet(
+        backgroundColor: const Color(0xFFF8F9F9),
+        elevation: 0,
+        isScrollControlled: true,
         context: context,
+        builder: (BuildContext dialogContext) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            // color: Colors.white,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height / 2,
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 50,
+                  child: Center(
+                    child: Text(
+                      'Please choose the business',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF0F1D27),
+                        fontSize: 18,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w700,
+                        height: 0,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: uniqueList.isNotEmpty
+                      ? ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 0),
+                          shrinkWrap: true,
+                          itemCount: uniqueList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              // clipBehavior is necessary because, without it, the InkWell's animation
+                              // will extend beyond the rounded edges of the [Card] (see https://github.com/flutter/flutter/issues/109776)
+                              // This comes with a small performance cost, and you should not set [clipBehavior]
+                              // unless you need it.
+                              clipBehavior: Clip.hardEdge,
+                              color: const Color(0xFFFFFFFF),
+                              elevation: 0,
+                              child: InkWell(
+                                  onTap: () {
+                                    setState(
+                                      () {
+                                        _extendBody = false;
+                                        _selectedIndex = 2;
+                                        _takePhotoPlaceId =
+                                            uniqueList[index]['id'];
+                                      },
+                                    );
+                                    Navigator.pop(dialogContext);
+                                  },
+                                  child: businessCard(
+                                      individualPlace: uniqueList[index])),
+                            );
+                          },
+                        )
+                      : const Center(
+                          child: Text("There are no businesses around you")),
+                ),
+              ],
+            ),
+          );
+        },
       );
     });
   }
@@ -330,9 +350,7 @@ class _HomePageState extends State<HomePage> {
     Marker myLocationMarker = await PlacesServices.getSpecialMarker(
         true, mylocation.latitude, mylocation.longitude);
     setState(() {
-      _myLocation = CameraPosition(
-          target: LatLng(mylocation.latitude, mylocation.longitude),
-          zoom: 16.5);
+      _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
       _showMarkers
           .removeWhere((element) => element.markerId.value == "mylocaation");
       _showMarkers.add(myLocationMarker);
