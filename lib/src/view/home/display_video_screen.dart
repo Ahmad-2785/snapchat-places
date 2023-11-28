@@ -6,42 +6,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
 
-class DisplayPictureScreen extends StatefulWidget {
-  const DisplayPictureScreen({
-    super.key,
-  });
+class DisplayVideoScreen extends StatefulWidget {
+  const DisplayVideoScreen({super.key});
 
   @override
-  State<DisplayPictureScreen> createState() => _DisplayPictureScreenState();
+  State<DisplayVideoScreen> createState() => _DisplayVideoScreenState();
 }
 
-class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
+class _DisplayVideoScreenState extends State<DisplayVideoScreen> {
   Map<String, dynamic> arguments = Get.arguments;
+  late VideoPlayerController _videoPlayerController;
 
-  void saveImage() async {
+  void saveVideo() async {
     try {
       // Get temporary directory
       final dir = await getTemporaryDirectory();
 
       // Create an image name
-      var filename = '${dir.path}/${DateTime.now()}.png';
+      var filename = '${dir.path}/${DateTime.now()}.mp4';
 
       // Save to filesystem
-      final File newImage = await File(arguments['imagePath']!).copy(filename);
-      print(dir);
+      final File newVideo = await File(arguments['filePath']!).copy(filename);
 
       // Ask the user to save it
-      final params = SaveFileDialogParams(sourceFilePath: newImage.path);
+      final params = SaveFileDialogParams(sourceFilePath: newVideo.path);
       final finalPath = await FlutterFileDialog.saveFile(params: params);
-      print(">>>>>>");
       print(finalPath);
     } catch (e) {
       print(e);
     }
   }
 
-  uploadImage() async {
+  uploadVideo() async {
     final fireUser = FirebaseAuth.instance.currentUser;
     print(arguments['placeId']);
     final providerID = fireUser!.providerData[0].providerId;
@@ -50,10 +48,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
         .ref()
         .child('stories')
         .child('${arguments['placeId']}/${DateTime.now()}');
-    final metadata = SettableMetadata(
-      contentType: 'image/jpeg', // Set the desired content type here
-    );
-    await firebaseStorageRef.putFile(File(arguments['imagePath']!), metadata);
+
+    await firebaseStorageRef.putFile(File(arguments['filePath']!));
 
     Future.delayed(Duration.zero, () {
       Navigator.pop(context);
@@ -61,17 +57,33 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   }
 
   @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    super.dispose();
+  }
+
+  Future _initVideoPlayer() async {
+    _videoPlayerController =
+        VideoPlayerController.file(File(arguments['filePath']));
+    await _videoPlayerController.initialize();
+    await _videoPlayerController.setLooping(true);
+    await _videoPlayerController.play();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: Image.file(File(arguments['imagePath']!)).image,
-                fit: BoxFit.cover,
-              ),
-            ),
+          FutureBuilder(
+            future: _initVideoPlayer(),
+            builder: (context, state) {
+              if (state.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return VideoPlayer(_videoPlayerController);
+              }
+            },
           ),
           Positioned(
             top: 20,
@@ -124,7 +136,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      saveImage();
+                      saveVideo();
                     },
                     style: ButtonStyle(
                       padding:
@@ -147,7 +159,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        uploadImage();
+                        uploadVideo();
                       },
                       style: const ButtonStyle(
                           padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(

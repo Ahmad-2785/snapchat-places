@@ -10,6 +10,7 @@ import 'package:snapchat/src/util/reusable_methods.dart';
 import 'package:snapchat/src/view/home/business_card.dart';
 import 'package:snapchat/src/view/home/camera_screen.dart';
 import 'package:snapchat/src/view/home/place_search_menu.dart';
+import 'package:snapchat/src/view/home/popup_menu.dart';
 
 import '../../../constants/file_constants.dart';
 import '../../view_model/services/splash_services.dart';
@@ -146,6 +147,7 @@ class _HomePageState extends State<HomePage> {
               },
               markers: _showMarkers,
             ),
+            const Positioned(top: 20, right: 20, child: PopupMenu()),
           ],
         ),
         const SizedBox(),

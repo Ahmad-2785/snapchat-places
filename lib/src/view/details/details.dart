@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
+import 'package:snapchat/src/view/details/video_play.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
@@ -18,7 +20,7 @@ class _DetailPageState extends State<DetailPage> {
   int selectedIndex = 0;
   String placeId = "";
   String formattedAddress = "";
-  List<String> storiesURLS = [];
+  List<Map<String, String>> storiesURLS = [];
   Map<String, dynamic> displayName = {"text": "", "languageCode": "en"};
   List photos = [];
   Location location = Location(lat: 0, lng: 0);
@@ -44,11 +46,18 @@ class _DetailPageState extends State<DetailPage> {
         FirebaseStorage.instance.ref().child('stories').child(placeId);
     final ListResult results = await storageref.listAll();
     final List<Reference> items = results.items;
-    final List<String> downloadURLS = [];
+    final List<Map<String, String>> downloadURLS = [];
     for (var i = 0; i < items.length; i++) {
       final download = await items[i].getDownloadURL();
-      downloadURLS.add(download);
+      final metadata = await items[i].getMetadata();
+      final contentType = metadata.contentType;
+
+      downloadURLS.add({
+        'download': download,
+        'type': contentType?.startsWith('image/') == true ? 'image' : 'video'
+      });
     }
+    print(downloadURLS);
     setState(() {
       placeId = result['id'];
       storiesURLS = downloadURLS;
@@ -441,7 +450,9 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                   Expanded(
                     child: <Widget>[
-                      Stories(storiesURLS: storiesURLS),
+                      Stories(
+                        storiesURLS: storiesURLS,
+                      ),
                       WorkingHours(weekdayDescriptions: weekdayDescriptions)
                     ][selectedIndex],
                   )
@@ -734,7 +745,7 @@ class Stories extends StatefulWidget {
     super.key,
     required this.storiesURLS,
   });
-  final List<String> storiesURLS;
+  final List<Map<String, String>> storiesURLS;
   @override
   State<Stories> createState() => _StoriesState();
 }
@@ -744,7 +755,7 @@ class _StoriesState extends State<Stories> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 12, top: 0),
-      child: FutureBuilder<List<String>>(
+      child: FutureBuilder<List<Map<String, String>>>(
         future: Future.value(widget.storiesURLS),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -754,14 +765,45 @@ class _StoriesState extends State<Stories> {
                     crossAxisCount: 3, childAspectRatio: 0.6),
                 itemBuilder: (context, index) {
                   return Padding(
-                      padding: const EdgeInsets.only(
-                          left: 8, right: 8, bottom: 16, top: 0),
-                      child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              image: DecorationImage(
-                                  image: NetworkImage(snapshot.data![index]),
-                                  fit: BoxFit.cover))));
+                    padding: const EdgeInsets.only(
+                        left: 8, right: 8, bottom: 16, top: 0),
+                    child: snapshot.data![index]['type'] == 'image'
+                        ? GestureDetector(
+                            onTap: () {
+                              print("Hello");
+                            },
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    image: DecorationImage(
+                                        image: NetworkImage(
+                                            snapshot.data![index]['download']!),
+                                        fit: BoxFit.cover))),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              print("World");
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: Stack(
+                                alignment: Alignment.bottomLeft,
+                                children: [
+                                  VideoPlay(
+                                      pathh: snapshot.data![index]['download']),
+                                  const Icon(
+                                    Icons.play_arrow,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                  );
                 });
           }
           return const Center(child: CircularProgressIndicator());

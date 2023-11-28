@@ -6,4 +6,5 @@ class Routes{
   static const completeProfile='/completeProfile';
   static const details='/details';
   static const displayPicureScreen='/displayPicureScreen';
+  static const displayVideoScreen='/displayVideoScreen';
 }
