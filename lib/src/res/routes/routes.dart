@@ -7,4 +7,6 @@ class Routes{
   static const details='/details';
   static const displayPicureScreen='/displayPicureScreen';
   static const displayVideoScreen='/displayVideoScreen';
+  static const videoDetailView='/videoDetailView';
+  static const imageDetailView='/imageDetailView';
 }

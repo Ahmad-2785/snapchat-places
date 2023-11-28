@@ -1,11 +1,13 @@
-import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
-import 'package:snapchat/src/view/details/video_play.dart';
+import 'package:snapchat/src/view/details/stories.dart';
+import 'package:snapchat/src/view/details/working_hours.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
@@ -15,7 +17,11 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  late String _username;
   late bool isLoading;
+  late int follow;
+  late bool isFollowed;
   final Map<String, dynamic> arguments = Get.arguments;
   int selectedIndex = 0;
   String placeId = "";
@@ -28,6 +34,34 @@ class _DetailPageState extends State<DetailPage> {
   bool openNow = true;
   List<dynamic> weekdayDescriptions = [];
 
+  void followAction() async {
+    if (isFollowed == true) {
+      QuerySnapshot querySnapshot = await firestore
+          .collection('Following')
+          .where('username', isEqualTo: _username)
+          .where('placeId', isEqualTo: placeId)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.size > 0) {
+        await querySnapshot.docs.first.reference.delete();
+        setState(() {
+          isFollowed = false;
+          follow = follow - 1;
+        });
+      }
+    } else {
+      await firestore.collection('Following').add({
+        'username': _username,
+        'placeId': placeId,
+      });
+      setState(() {
+        isFollowed = true;
+        follow = follow + 1;
+      });
+    }
+  }
+
   Future getPlacedetails(placeId) async {
     //Get place Info from Google API
     final result = await PlacesServices.getPlaceDetails(placeId);
@@ -39,9 +73,21 @@ class _DetailPageState extends State<DetailPage> {
         photoUri = photo['photoUri'];
       });
     }
-
+    // Get following numbers
+    QuerySnapshot follows = await firestore
+        .collection(
+            'Following') // Replace "your_collection" with your actual collection name
+        .where('placeId', isEqualTo: placeId)
+        .get();
+    // Check if the user followed this pace
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String username = pref.getString('USERNAME') ?? "";
+    QuerySnapshot followed = await firestore
+        .collection('Following')
+        .where('username', isEqualTo: username)
+        .where('placeId', isEqualTo: placeId)
+        .get();
     // Get Stories URLS from firestorage
-
     final storageref =
         FirebaseStorage.instance.ref().child('stories').child(placeId);
     final ListResult results = await storageref.listAll();
@@ -57,9 +103,10 @@ class _DetailPageState extends State<DetailPage> {
         'type': contentType?.startsWith('image/') == true ? 'image' : 'video'
       });
     }
-    print(downloadURLS);
     setState(() {
-      placeId = result['id'];
+      _username = username;
+      follow = follows.size;
+      isFollowed = followed.size > 0;
       storiesURLS = downloadURLS;
       displayName = result['displayName'];
       formattedAddress = result['shortFormattedAddress'];
@@ -81,6 +128,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     isLoading = true;
+    placeId = arguments['placeID'];
     getPlacedetails(arguments['placeID']);
   }
 
@@ -276,15 +324,22 @@ class _DetailPageState extends State<DetailPage> {
                                   MaterialStatePropertyAll<EdgeInsetsGeometry>(
                                       EdgeInsets.only(right: 24, left: 24)),
                             ),
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.favorite_border,
-                              color: Colors.black,
-                            ),
-                            label: const Text(
-                              '362',
+                            onPressed: () {
+                              followAction();
+                            },
+                            icon: isFollowed == true
+                                ? const Icon(
+                                    Icons.favorite,
+                                    color: Color(0xFFFFABE1),
+                                  )
+                                : const Icon(
+                                    Icons.favorite_border,
+                                    color: Color(0xFFFFABE1),
+                                  ),
+                            label: Text(
+                              "$follow",
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFF0F1D27),
                                 fontSize: 16,
                                 fontFamily: 'Lato',
@@ -459,356 +514,6 @@ class _DetailPageState extends State<DetailPage> {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class WorkingHours extends StatelessWidget {
-  const WorkingHours({super.key, required this.weekdayDescriptions});
-  final List<dynamic> weekdayDescriptions;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          margin: const EdgeInsets.only(left: 20, top: 20, right: 20),
-          width: double.infinity,
-          decoration: ShapeDecoration(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              side: const BorderSide(width: 1, color: Color(0xFFECEEEF)),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            //Monday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Monday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[0].substring(8)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[0].substring(8) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
-            //Tuesday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Tuesday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[1].substring(9)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[1].substring(9) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
-            //Wednesday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Wednesday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[2].substring(11)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[2].substring(11) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
-            //Thursday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Thursday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[3].substring(10)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[3].substring(10) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
-            //Friday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Friday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[4].substring(8)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[4].substring(8) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
-            //Saturday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Saturday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[5].substring(10)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[5].substring(10) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
-            //Sunday
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Sunday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                  Text(
-                    weekdayDescriptions.isNotEmpty
-                        ? weekdayDescriptions[6].substring(8)
-                        : "",
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      color: weekdayDescriptions.isNotEmpty &&
-                              weekdayDescriptions[6].substring(8) == "Closed"
-                          ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]),
-        )
-      ],
-    );
-  }
-}
-
-class Stories extends StatefulWidget {
-  const Stories({
-    super.key,
-    required this.storiesURLS,
-  });
-  final List<Map<String, String>> storiesURLS;
-  @override
-  State<Stories> createState() => _StoriesState();
-}
-
-class _StoriesState extends State<Stories> {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 12, right: 12, top: 0),
-      child: FutureBuilder<List<Map<String, String>>>(
-        future: Future.value(widget.storiesURLS),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return GridView.builder(
-                itemCount: snapshot.data?.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, childAspectRatio: 0.6),
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(
-                        left: 8, right: 8, bottom: 16, top: 0),
-                    child: snapshot.data![index]['type'] == 'image'
-                        ? GestureDetector(
-                            onTap: () {
-                              print("Hello");
-                            },
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    image: DecorationImage(
-                                        image: NetworkImage(
-                                            snapshot.data![index]['download']!),
-                                        fit: BoxFit.cover))),
-                          )
-                        : GestureDetector(
-                            onTap: () {
-                              print("World");
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: Stack(
-                                alignment: Alignment.bottomLeft,
-                                children: [
-                                  VideoPlay(
-                                      pathh: snapshot.data![index]['download']),
-                                  const Icon(
-                                    Icons.play_arrow,
-                                    size: 20,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                  );
-                });
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
     );
   }
 }
