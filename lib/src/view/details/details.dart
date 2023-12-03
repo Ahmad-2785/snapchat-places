@@ -178,12 +178,9 @@ class _DetailPageState extends State<DetailPage> {
                           ),
                         ),
                         const SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: Icon(
-                              Icons.arrow_left_sharp,
-                              size: 24,
-                            )),
+                          width: 48,
+                          height: 48,
+                        ),
                       ],
                     ),
                   ),

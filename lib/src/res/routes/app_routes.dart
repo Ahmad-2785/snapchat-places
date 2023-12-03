@@ -6,6 +6,9 @@ import 'package:snapchat/src/view/home/display_picture_screen.dart';
 import 'package:snapchat/src/view/home/display_video_screen.dart';
 import 'package:snapchat/src/view/home/home.dart';
 import 'package:snapchat/src/view/profile/complete_profile.dart';
+import 'package:snapchat/src/view/settings/privacy_and_policy.dart';
+import 'package:snapchat/src/view/settings/settings.dart';
+import 'package:snapchat/src/view/settings/terms_and_conditions.dart';
 import 'package:snapchat/src/view/signin/components/otp_screen.dart';
 import 'package:snapchat/src/view/signin/sign_in.dart';
 import 'package:snapchat/src/view/intro/splash.dart';
@@ -18,6 +21,9 @@ class AppRoutes {
       GetPage(name: Routes.intro, page: () => const SplashPage()),
       GetPage(name: Routes.signIn, page: () => const SignIn()),
       GetPage(name: Routes.homePage, page: () => const HomePage()),
+      GetPage(name: Routes.settings, page: () => const Settings()),
+      GetPage(name: Routes.termsAndConditions, page: () => const TermsAndConditions()),
+      GetPage(name: Routes.privacyAndPolicy, page: () => const PrivacyAndPolicy()),
       GetPage(
           name: Routes.completeProfile, page: () => const CompleteProfile()),
       GetPage(name: Routes.details, page: () => const DetailPage()),

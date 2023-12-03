@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
+import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/util/reusable_methods.dart';
 import 'package:snapchat/src/view/home/business_card.dart';
 import 'package:snapchat/src/view/home/camera_screen.dart';
@@ -147,7 +148,38 @@ class _HomePageState extends State<HomePage> {
               },
               markers: _showMarkers,
             ),
-            const Positioned(top: 20, right: 20, child: PopupMenu()),
+            Positioned(
+              top: 20,
+              right: 20,
+              child: GestureDetector(
+                onTap: () {
+                  Get.toNamed(Routes.settings);
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: ShapeDecoration(
+                    color: Colors.black.withOpacity(0.23999999463558197),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(48),
+                    ),
+                  ),
+                  child: Center(
+                    child: Container(
+                        width: 20,
+                        height: 20,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: const BoxDecoration(),
+                        child: const Icon(
+                          Icons.settings_outlined,
+                          size: 20,
+                          color: Colors.white,
+                        )),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(),
