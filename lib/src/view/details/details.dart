@@ -35,6 +35,8 @@ class _DetailPageState extends State<DetailPage> {
   List<dynamic> weekdayDescriptions = [];
 
   void followAction() async {
+    print(">>>>>>>");
+    print(placeId);
     if (isFollowed == true) {
       QuerySnapshot querySnapshot = await firestore
           .collection('Following')
@@ -152,28 +154,24 @@ class _DetailPageState extends State<DetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          child: const SizedBox(
+                          child: SizedBox(
                               width: 48,
                               height: 48,
                               child: Icon(
                                 Icons.arrow_back_ios,
+                                color:
+                                    Theme.of(context).colorScheme.onBackground,
                                 size: 24,
                               )),
                           onTap: () {
                             Navigator.pop(context);
                           },
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Center(
                             child: Text(
                               'Details',
-                              style: TextStyle(
-                                color: Color(0xFF0F1D27),
-                                fontSize: 18,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w700,
-                                height: 0,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
                           ),
                         ),
@@ -241,28 +239,19 @@ class _DetailPageState extends State<DetailPage> {
                           children: [
                             Text(
                               displayName['text'],
-                              style: const TextStyle(
-                                color: Color(0xFF0F1D27),
-                                fontSize: 16,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                             Text(
                               formattedAddress,
-                              style: const TextStyle(
-                                color: Color(0xFFA7ACAF),
-                                fontSize: 14,
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                              ),
+                              style: Theme.of(context).textTheme.displaySmall,
                             ),
                             openNow
                                 ? Text(
                                     'Open now',
                                     style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onBackground,
                                       fontSize: 14,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w400,
@@ -294,10 +283,12 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                       Container(
                         decoration: ShapeDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.secondary,
                           shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                                width: 1, color: Color(0xFFECEEEF)),
+                            side: BorderSide(
+                                width: 1,
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary),
                             borderRadius: BorderRadius.circular(48),
                           ),
                           shadows: const [
@@ -314,9 +305,9 @@ class _DetailPageState extends State<DetailPage> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(48),
                           child: ElevatedButton.icon(
-                            style: const ButtonStyle(
-                              backgroundColor:
-                                  MaterialStatePropertyAll(Color(0xFFFFFFFF)),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStatePropertyAll(
+                                  Theme.of(context).colorScheme.secondary),
                               padding:
                                   MaterialStatePropertyAll<EdgeInsetsGeometry>(
                                       EdgeInsets.only(right: 24, left: 24)),
@@ -336,12 +327,7 @@ class _DetailPageState extends State<DetailPage> {
                             label: Text(
                               "$follow",
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(0xFF0F1D27),
-                                fontSize: 16,
-                                fontFamily: 'Lato',
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ),
                         ),
@@ -352,10 +338,13 @@ class _DetailPageState extends State<DetailPage> {
                       Expanded(
                         child: Container(
                           decoration: ShapeDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.secondary,
                             shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFECEEEF)),
+                              side: BorderSide(
+                                width: 1,
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary,
+                              ),
                               borderRadius: BorderRadius.circular(48),
                             ),
                             shadows: const [
@@ -438,8 +427,12 @@ class _DetailPageState extends State<DetailPage> {
                                 bottom: BorderSide(
                                     width: 1,
                                     color: selectedIndex == 0
-                                        ? const Color(0xFF0F1D27)
-                                        : const Color(0xFFECEEEF)),
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .tertiaryContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onTertiary),
                               ),
                             ),
                             child: Center(
@@ -448,8 +441,12 @@ class _DetailPageState extends State<DetailPage> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: selectedIndex == 0
-                                      ? const Color(0xFF0F1D27)
-                                      : const Color(0xFF70787E),
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onTertiaryContainer,
                                   fontSize: 16,
                                   fontFamily: 'Lato',
                                   fontWeight: FontWeight.w600,
@@ -476,8 +473,12 @@ class _DetailPageState extends State<DetailPage> {
                                 bottom: BorderSide(
                                     width: 1,
                                     color: selectedIndex == 1
-                                        ? const Color(0xFF0F1D27)
-                                        : const Color(0xFFECEEEF)),
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .tertiaryContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onTertiary),
                               ),
                             ),
                             child: Center(
@@ -486,8 +487,12 @@ class _DetailPageState extends State<DetailPage> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: selectedIndex == 1
-                                      ? const Color(0xFF0F1D27)
-                                      : const Color(0xFF70787E),
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onTertiaryContainer,
                                   fontSize: 16,
                                   fontFamily: 'Lato',
                                   fontWeight: FontWeight.w600,

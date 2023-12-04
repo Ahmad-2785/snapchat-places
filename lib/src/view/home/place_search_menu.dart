@@ -63,6 +63,8 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
                   });
                   searchPlaces();
                 },
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onBackground),
                 decoration: CustomInputDecoration(
                     'Search',
                     const Icon(
@@ -70,7 +72,7 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
                       color: Color(0xFFA7ACAF),
                       size: 24,
                     ),
-                    fillColor: Color(0xFFECEEEF)),
+                    fillColor: Theme.of(context).colorScheme.tertiary),
               )),
               const SizedBox(
                 width: 16,
@@ -88,15 +90,15 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   clipBehavior: Clip.antiAlias,
                   decoration: ShapeDecoration(
-                    color: const Color(0xFFECEEEF),
+                    color: Theme.of(context).colorScheme.tertiary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(48),
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     size: 24,
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onBackground,
                   ),
                 ),
               ),
@@ -108,8 +110,8 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
           Expanded(
             child: placesLists.isNotEmpty
                 ? ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8, horizontal: 0),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                     shrinkWrap: true,
                     itemCount: placesLists.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -119,7 +121,7 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
                         // This comes with a small performance cost, and you should not set [clipBehavior]
                         // unless you need it.
                         clipBehavior: Clip.hardEdge,
-                        color: Color(0xFFFFFFFF),
+                        color: Theme.of(context).colorScheme.secondary,
                         elevation: 0,
                         child: InkWell(
                             onTap: () {
@@ -127,16 +129,19 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
                                 'placeID': placesLists[index]['id']
                               });
                             },
-                            child: businessCard(
+                            child: BusinessCard(
                                 individualPlace: placesLists[index])),
                       );
                     },
                   )
-                : const Center(child: Text("There are no places")),
+                : Center(
+                    child: Text(
+                    "There are no places",
+                    style: Theme.of(context).textTheme.titleSmall,
+                  )),
           ),
         ],
       ),
     );
   }
 }
-

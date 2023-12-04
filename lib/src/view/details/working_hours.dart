@@ -12,9 +12,10 @@ class WorkingHours extends StatelessWidget {
           margin: const EdgeInsets.only(left: 20, top: 20, right: 20),
           width: double.infinity,
           decoration: ShapeDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.secondary,
             shape: RoundedRectangleBorder(
-              side: const BorderSide(width: 1, color: Color(0xFFECEEEF)),
+              side: BorderSide(
+                  width: 1, color: Theme.of(context).colorScheme.onSecondary),
               borderRadius: BorderRadius.circular(20),
             ),
           ),
@@ -25,15 +26,9 @@ class WorkingHours extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Monday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -44,7 +39,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[0].substring(8) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -54,22 +49,17 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
+            Divider(
+                color: Theme.of(context).colorScheme.onSecondary, thickness: 1),
             //Tuesday
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Tuesday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -80,7 +70,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[1].substring(9) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -90,22 +80,17 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
+            Divider(
+                color: Theme.of(context).colorScheme.onSecondary, thickness: 1),
             //Wednesday
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Wednesday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -116,7 +101,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[2].substring(11) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -126,22 +111,17 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
+            Divider(
+                color: Theme.of(context).colorScheme.onSecondary, thickness: 1),
             //Thursday
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Thursday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -152,7 +132,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[3].substring(10) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -162,22 +142,17 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
+            Divider(
+                color: Theme.of(context).colorScheme.onSecondary, thickness: 1),
             //Friday
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Friday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -188,7 +163,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[4].substring(8) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -198,22 +173,17 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
+            Divider(
+                color: Theme.of(context).colorScheme.onSecondary, thickness: 1),
             //Saturday
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Saturday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -224,7 +194,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[5].substring(10) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,
@@ -234,22 +204,17 @@ class WorkingHours extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Color(0xFFECEEEF), thickness: 1),
+            Divider(
+                color: Theme.of(context).colorScheme.onSecondary, thickness: 1),
             //Sunday
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Sunday',
-                    style: TextStyle(
-                      color: Color(0xFF70787E),
-                      fontSize: 14,
-                      fontFamily: 'Lato',
-                      fontWeight: FontWeight.w400,
-                      height: 0.08,
-                    ),
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
                   Text(
                     weekdayDescriptions.isNotEmpty
@@ -260,7 +225,7 @@ class WorkingHours extends StatelessWidget {
                       color: weekdayDescriptions.isNotEmpty &&
                               weekdayDescriptions[6].substring(8) == "Closed"
                           ? const Color(0xFFFD363B)
-                          : const Color(0xFF0F1D27),
+                          : Theme.of(context).colorScheme.tertiaryContainer,
                       fontSize: 14,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w400,

@@ -21,7 +21,7 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> {
   TextEditingController otpController = TextEditingController();
-
+  bool isLoading = false;
   final CountdownController _timeController =
       CountdownController(autoStart: true);
 
@@ -51,209 +51,112 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage('assets/images/background2.png'),
-                fit: BoxFit.cover)),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Logo image
-            Image.asset(
-              'assets/images/logo_pink.png',
-              width: 66,
-              height: 82,
-            ),
-            const SizedBox(
-              height: 24,
-            ),
-
-            // Page Title
-            const Text(
-              'Verify',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 36,
-                  fontFamily: 'Lato',
-                  fontWeight: FontWeight.w700),
-            ),
-            const Text(
-              "Please enter 6-digit code we've sent to",
-              style: TextStyle(
-                color: Color(0xFF0F1D27),
-                fontSize: 16,
-                fontFamily: 'Lato',
-                fontWeight: FontWeight.w600,
-                height: 0,
-              ),
-            ),
-
-            // Help Text
-            Text(
-              "${phoneNumber.substring(0, 2)} ${phoneNumber.substring(2, 5)} ${phoneNumber.substring(5, 8)} ${phoneNumber.substring(8, 11)}",
-              style: const TextStyle(
-                color: Color(0xFF6155A6),
-                fontSize: 16,
-                fontFamily: 'Lato',
-                fontWeight: FontWeight.w600,
-                height: 0,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Verification Code Textfield
-            SizedBox(
-              height: 48,
-              child: OtpTextField(
-                onSubmit: (value) {
-                  otpController.text = value;
-                },
-                clearText: !isError,
-                showCursor: false,
-                numberOfFields: 6,
-                fieldWidth: 48,
-                filled: true,
-                fillColor: const Color(0xFFF8F9F9),
-                borderColor:
-                    isError ? const Color(0xFFFD363B) : const Color(0xFFF8F9F9),
-                enabledBorderColor:
-                    isError ? const Color(0xFFFD363B) : const Color(0xFFF8F9F9),
-                focusedBorderColor:
-                    isError ? const Color(0xFFFD363B) : const Color(0xFFF8F9F9),
-                borderWidth: 1,
-                textStyle: TextStyle(
-                  color: isError
-                      ? const Color(0xFFFD363B)
-                      : const Color(0xFF6155A6),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('assets/images/background2.png'),
+                    fit: BoxFit.cover)),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Logo image
+                Image.asset(
+                  'assets/images/logo_pink.png',
+                  width: 66,
+                  height: 82,
                 ),
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                showFieldAsBox: true,
-                borderRadius: const BorderRadius.all(Radius.circular(48.0)),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Verify Button
-            Container(
-              decoration: ShapeDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(
-                  side: const BorderSide(width: 1, color: Color(0xFFECEEEF)),
-                  borderRadius: BorderRadius.circular(48),
+                const SizedBox(
+                  height: 24,
                 ),
-                shadows: const [
-                  BoxShadow(
-                    color: Color(0x05000000),
-                    blurRadius: 16,
-                    offset: Offset(0, 4),
-                    spreadRadius: -4,
-                  )
-                ],
-              ),
-              clipBehavior: Clip.antiAlias,
-              width: double.infinity,
-              height: 48,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(48),
-                child: ElevatedButton(
-                  onPressed: () {
-                    AuthCredential phoneAuthCredential =
-                        PhoneAuthProvider.credential(
-                            verificationId: newreceivedID,
-                            smsCode: otpController.text);
-                    signin(phoneAuthCredential);
-                  },
-                  style: const ButtonStyle(
-                      backgroundColor:
-                          MaterialStatePropertyAll(Color(0xFF6155A6))),
-                  child: const Text(
-                    'Verify',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
+
+                // Page Title
+                const Text(
+                  'Verify',
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 36,
                       fontFamily: 'Lato',
-                      fontWeight: FontWeight.w600,
-                      height: 0,
-                    ),
+                      fontWeight: FontWeight.w700),
+                ),
+                const Text(
+                  "Please enter 6-digit code we've sent to",
+                  style: TextStyle(
+                    color: Color(0xFF0F1D27),
+                    fontSize: 16,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeight.w600,
+                    height: 0,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
 
-            // Resend Verification Button
-            Builder(builder: (context) {
-              if (resned2) {
-                return Opacity(
-                  opacity: 0.48,
-                  child: Container(
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            width: 1, color: Color(0xFFEFEEF6)),
-                        borderRadius: BorderRadius.circular(48),
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    width: double.infinity,
-                    height: 48,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(48),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                const Color(0xFFEFEEF6))),
-                        onPressed: () {},
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Resend in: ',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 16,
-                                fontFamily: 'Lato',
-                                fontWeight: FontWeight.w600,
-                                height: 0,
-                              ),
-                            ),
-                            Countdown(
-                              controller: _timeController,
-                              seconds: 120,
-                              build: (_, double time) => Text(
-                                formatTime(time),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 16,
-                                  fontFamily: 'Lato',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              interval: const Duration(milliseconds: 1000),
-                              onFinished: () {
-                                setState(() {
-                                  resned2 = false;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                // Help Text
+                Text(
+                  "${phoneNumber.substring(0, 2)} ${phoneNumber.substring(2, 5)} ${phoneNumber.substring(5, 8)} ${phoneNumber.substring(8, 11)}",
+                  style: const TextStyle(
+                    color: Color(0xFF6155A6),
+                    fontSize: 16,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeight.w600,
+                    height: 0,
                   ),
-                );
-              } else {
-                return Container(
+                ),
+                const SizedBox(height: 24),
+
+                // Verification Code Textfield
+                SizedBox(
+                  height: 48,
+                  child: OtpTextField(
+                    onSubmit: (value) {
+                      otpController.text = value;
+                    },
+                    clearText: !isError,
+                    showCursor: false,
+                    numberOfFields: 6,
+                    fieldWidth: 48,
+                    filled: true,
+                    fillColor: const Color(0xFFF8F9F9),
+                    borderColor: isError
+                        ? const Color(0xFFFD363B)
+                        : const Color(0xFFF8F9F9),
+                    enabledBorderColor: isError
+                        ? const Color(0xFFFD363B)
+                        : const Color(0xFFF8F9F9),
+                    focusedBorderColor: isError
+                        ? const Color(0xFFFD363B)
+                        : const Color(0xFFF8F9F9),
+                    borderWidth: 1,
+                    textStyle: TextStyle(
+                      color: isError
+                          ? const Color(0xFFFD363B)
+                          : const Color(0xFF6155A6),
+                    ),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    showFieldAsBox: true,
+                    borderRadius: const BorderRadius.all(Radius.circular(48.0)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Verify Button
+                Container(
                   decoration: ShapeDecoration(
+                    color: Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       side:
-                          const BorderSide(width: 1, color: Color(0xFFEFEEF6)),
+                          const BorderSide(width: 1, color: Color(0xFFECEEEF)),
                       borderRadius: BorderRadius.circular(48),
                     ),
+                    shadows: const [
+                      BoxShadow(
+                        color: Color(0x05000000),
+                        blurRadius: 16,
+                        offset: Offset(0, 4),
+                        spreadRadius: -4,
+                      )
+                    ],
                   ),
                   clipBehavior: Clip.antiAlias,
                   width: double.infinity,
@@ -261,17 +164,21 @@ class _OtpScreenState extends State<OtpScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(48),
                     child: ElevatedButton(
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              const Color(0xFFEFEEF6))),
                       onPressed: () {
-                        resendOTP(phoneNumber: phoneNumber);
+                        AuthCredential phoneAuthCredential =
+                            PhoneAuthProvider.credential(
+                                verificationId: newreceivedID,
+                                smsCode: otpController.text);
+                        signin(phoneAuthCredential);
                       },
-                      child: Text(
-                        'Resend',
+                      style: const ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll(Color(0xFF6155A6))),
+                      child: const Text(
+                        'Verify',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Colors.white,
                           fontSize: 16,
                           fontFamily: 'Lato',
                           fontWeight: FontWeight.w600,
@@ -280,25 +187,159 @@ class _OtpScreenState extends State<OtpScreen> {
                       ),
                     ),
                   ),
-                );
-              }
-            }),
-          ],
-        ),
+                ),
+                const SizedBox(height: 16),
+
+                // Resend Verification Button
+                Builder(builder: (context) {
+                  if (resned2) {
+                    return Opacity(
+                      opacity: 0.48,
+                      child: Container(
+                        decoration: ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                                width: 1, color: Color(0xFFEFEEF6)),
+                            borderRadius: BorderRadius.circular(48),
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        width: double.infinity,
+                        height: 48,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(48),
+                          child: ElevatedButton(
+                            style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        const Color(0xFFEFEEF6))),
+                            onPressed: () {},
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Resend in: ',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontSize: 16,
+                                    fontFamily: 'Lato',
+                                    fontWeight: FontWeight.w600,
+                                    height: 0,
+                                  ),
+                                ),
+                                Countdown(
+                                  controller: _timeController,
+                                  seconds: 120,
+                                  build: (_, double time) => Text(
+                                    formatTime(time),
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontSize: 16,
+                                      fontFamily: 'Lato',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  interval: const Duration(milliseconds: 1000),
+                                  onFinished: () {
+                                    setState(() {
+                                      resned2 = false;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              width: 1, color: Color(0xFFEFEEF6)),
+                          borderRadius: BorderRadius.circular(48),
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      width: double.infinity,
+                      height: 48,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(48),
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  const Color(0xFFEFEEF6))),
+                          onPressed: () {
+                            resendOTP(phoneNumber: phoneNumber);
+                          },
+                          child: Text(
+                            'Resend',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 16,
+                              fontFamily: 'Lato',
+                              fontWeight: FontWeight.w600,
+                              height: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                }),
+              ],
+            ),
+          ),
+          isLoading
+              ? Positioned.fill(
+                  child: Container(
+                    color: Color(0xFF8B9296).withOpacity(0.8),
+                    child: Center(
+                      child: Container(
+                        padding: EdgeInsets.all(30),
+                        width: 100,
+                        height: 100,
+                        decoration: ShapeDecoration(
+                          // color: Color.fromARGB(255, 41, 3, 255).withOpacity(0.2),
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+                )
+              : SizedBox()
+        ],
       ),
     );
   }
 
   void signin(AuthCredential phoneAuthCredential) async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       final authCred =
           await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
-
+      setState(() {
+        isLoading = false;
+      });
       if (authCred.user != null) {
         print("signin success");
         Get.offAll(() => const CompleteProfile());
       }
     } on FirebaseAuthException catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       if (kDebugMode) {
         print(e.message);
       }

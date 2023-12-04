@@ -11,7 +11,6 @@ import 'package:snapchat/src/util/reusable_methods.dart';
 import 'package:snapchat/src/view/home/business_card.dart';
 import 'package:snapchat/src/view/home/camera_screen.dart';
 import 'package:snapchat/src/view/home/place_search_menu.dart';
-import 'package:snapchat/src/view/home/popup_menu.dart';
 
 import '../../../constants/file_constants.dart';
 import '../../view_model/services/splash_services.dart';
@@ -108,9 +107,42 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _showBackDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure?'),
+          content: const Text(
+            'Are you sure you want to leave this page?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Nevermind'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Leave'),
+              onPressed: () {
+                SystemNavigator.pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
-    print(">>>>>>>>>>");
     super.initState();
     SplashServices.checkProfile();
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -123,162 +155,213 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      extendBody: _extendBody,
-      body: <Widget>[
-        Stack(
-          children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              zoomControlsEnabled: false,
-              // myLocationEnabled: true,
-              initialCameraPosition: currentPos,
-              onMapCreated: (GoogleMapController controller) {
-                _mapController = controller;
-                _mapController.setMapStyle(_mapStyle);
-              },
-              minMaxZoomPreference: const MinMaxZoomPreference(14, 20),
-              mapToolbarEnabled: false,
-              onTap: (LatLng latLng) {
-                print(latLng);
-              },
-              onCameraMove: (CameraPosition position) {
-                updateMarkers(position);
-              },
-              markers: _showMarkers,
-            ),
-            Positioned(
-              top: 20,
-              right: 20,
-              child: GestureDetector(
-                onTap: () {
-                  Get.toNamed(Routes.settings);
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: ShapeDecoration(
-                    color: Colors.black.withOpacity(0.23999999463558197),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(48),
-                    ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (bool didPop) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              elevation: 1,
+              backgroundColor: Theme.of(context).colorScheme.background,
+              title: Text(
+                'Are you sure?',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              content: Text(
+                'Are you sure you want to exist app?',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
                   ),
-                  child: Center(
-                    child: Container(
-                        width: 20,
-                        height: 20,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: const BoxDecoration(),
-                        child: const Icon(
-                          Icons.settings_outlined,
-                          size: 20,
-                          color: Colors.white,
-                        )),
+                  child: Text(
+                    'Nevermind',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('Exist'),
+                  onPressed: () {
+                    print("<<<<<<<<");
+                    Navigator.of(context).pop(true);
+                    SystemNavigator.pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        extendBody: _extendBody,
+        body: <Widget>[
+          Stack(
+            children: [
+              GoogleMap(
+                mapType: MapType.normal,
+                zoomControlsEnabled: false,
+                // myLocationEnabled: true,
+                initialCameraPosition: currentPos,
+                onMapCreated: (GoogleMapController controller) {
+                  _mapController = controller;
+                  _mapController.setMapStyle(_mapStyle);
+                },
+                minMaxZoomPreference: const MinMaxZoomPreference(14, 20),
+                mapToolbarEnabled: false,
+                onTap: (LatLng latLng) {
+                  print(latLng);
+                },
+                onCameraMove: (CameraPosition position) {
+                  updateMarkers(position);
+                },
+                markers: _showMarkers,
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.toNamed(Routes.settings);
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: ShapeDecoration(
+                      color: Colors.black.withOpacity(0.23999999463558197),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(48),
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                          width: 20,
+                          height: 20,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: const BoxDecoration(),
+                          child: const Icon(
+                            Icons.settings_outlined,
+                            size: 20,
+                            color: Colors.white,
+                          )),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(),
-        FutureBuilder(
-          future: availableCameras(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final cameras = snapshot.data as List<CameraDescription>;
-              final backCameras = cameras
-                  .where((cam) => cam.lensDirection == CameraLensDirection.back)
-                  .toList();
-              if (backCameras.isNotEmpty) {
-                return CameraScreen(
-                    cameraDescription: backCameras[0],
-                    placeId: _takePhotoPlaceId);
+            ],
+          ),
+          const SizedBox(),
+          FutureBuilder(
+            future: availableCameras(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final cameras = snapshot.data as List<CameraDescription>;
+                final backCameras = cameras
+                    .where(
+                        (cam) => cam.lensDirection == CameraLensDirection.back)
+                    .toList();
+                if (backCameras.isNotEmpty) {
+                  return CameraScreen(
+                      cameraDescription: backCameras[0],
+                      placeId: _takePhotoPlaceId);
+                } else {
+                  return const Center(
+                    child: Text("No Camera Found!"),
+                  );
+                }
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text("ERROR : ${snapshot.error}"),
+                );
               } else {
                 return const Center(
-                  child: Text("No Camera Found!"),
-                );
-              }
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text("ERROR : ${snapshot.error}"),
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
-        ),
-      ][_selectedIndex],
-      bottomNavigationBar: Container(
-        height: 88,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        clipBehavior: Clip.antiAlias,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          border: Border(
-            left: BorderSide(color: Color(0xFFECEEEF)),
-            top: BorderSide(width: 1, color: Color(0xFFECEEEF)),
-            right: BorderSide(color: Color(0xFFECEEEF)),
-            bottom: BorderSide(color: Color(0xFFECEEEF)),
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(56),
-          child: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.location_on),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt_outlined),
-                label: '',
-              ),
-            ],
-            backgroundColor: const Color(0xFFF8F9F9),
-            unselectedItemColor: const Color(0XFFA7ACAF),
-            selectedFontSize: 0,
-            currentIndex: _selectedIndex,
-            selectedItemColor: Colors.black,
-            onTap: (int index) {
-              switch (index) {
-                case 0:
-                  setState(() {
-                    _extendBody = true;
-                  });
-                  if (_selectedIndex == index) {
-                    _mapController.moveCamera(CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                            target: LatLng(
-                                _myLocation.latitude, _myLocation.longitude),
-                            zoom: _zoom)));
-                  }
-                case 1:
-                  showModal(context);
-                case 2:
-                  if (_selectedIndex != index) {
-                    showPossiblePositions(context);
-                  }
-              }
-              if (index == 0) {
-                setState(
-                  () {
-                    _selectedIndex = index;
-                  },
+                  child: CircularProgressIndicator(),
                 );
               }
             },
+          ),
+        ][_selectedIndex],
+        bottomNavigationBar: Container(
+          width: double.infinity,
+          height: 88,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            border: Border(
+              left: BorderSide(color: Theme.of(context).colorScheme.secondary),
+              top: BorderSide(
+                  width: 1, color: Theme.of(context).colorScheme.secondary),
+              right: BorderSide(color: Theme.of(context).colorScheme.secondary),
+              bottom:
+                  BorderSide(color: Theme.of(context).colorScheme.secondary),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(56),
+            child: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.location_on),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.search),
+                  label: '',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.camera_alt_outlined),
+                  label: '',
+                ),
+              ],
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              unselectedItemColor: const Color(0XFFA7ACAF),
+              selectedFontSize: 0,
+              currentIndex: _selectedIndex,
+              selectedItemColor: Theme.of(context).colorScheme.onBackground,
+              onTap: (int index) {
+                switch (index) {
+                  case 0:
+                    setState(() {
+                      _extendBody = true;
+                    });
+                    if (_selectedIndex == index) {
+                      _mapController.moveCamera(CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                              target: LatLng(
+                                  _myLocation.latitude, _myLocation.longitude),
+                              zoom: _zoom)));
+                    }
+                  case 1:
+                    showModal(context);
+                  case 2:
+                    if (_selectedIndex != index) {
+                      showPossiblePositions(context);
+                    }
+                }
+                if (index == 0) {
+                  setState(
+                    () {
+                      _selectedIndex = index;
+                    },
+                  );
+                }
+              },
+            ),
           ),
         ),
       ),
@@ -287,7 +370,7 @@ class _HomePageState extends State<HomePage> {
 
   void showModal(BuildContext context) {
     showModalBottomSheet(
-      backgroundColor: const Color(0xFFF8F9F9),
+      backgroundColor: Theme.of(context).colorScheme.background,
       elevation: 0,
       isScrollControlled: true,
       context: context,
@@ -312,7 +395,7 @@ class _HomePageState extends State<HomePage> {
 
     Future.delayed(Duration.zero, () {
       showModalBottomSheet(
-        backgroundColor: const Color(0xFFF8F9F9),
+        backgroundColor: Theme.of(context).colorScheme.background,
         elevation: 0,
         isScrollControlled: true,
         context: context,
@@ -324,19 +407,13 @@ class _HomePageState extends State<HomePage> {
             height: MediaQuery.of(context).size.height / 2,
             child: Column(
               children: [
-                const SizedBox(
+                SizedBox(
                   height: 50,
                   child: Center(
                     child: Text(
                       'Please choose the business',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFF0F1D27),
-                        fontSize: 18,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
-                        height: 0,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                 ),
@@ -354,7 +431,7 @@ class _HomePageState extends State<HomePage> {
                               // This comes with a small performance cost, and you should not set [clipBehavior]
                               // unless you need it.
                               clipBehavior: Clip.hardEdge,
-                              color: const Color(0xFFFFFFFF),
+                              color: Theme.of(context).colorScheme.secondary,
                               elevation: 0,
                               child: InkWell(
                                   onTap: () {
@@ -368,13 +445,16 @@ class _HomePageState extends State<HomePage> {
                                     );
                                     Navigator.pop(dialogContext);
                                   },
-                                  child: businessCard(
+                                  child: BusinessCard(
                                       individualPlace: uniqueList[index])),
                             );
                           },
                         )
-                      : const Center(
-                          child: Text("There are no businesses around you")),
+                      : Center(
+                          child: Text(
+                          "There are no businesses around you",
+                          style: Theme.of(context).textTheme.titleSmall,
+                        )),
                 ),
               ],
             ),

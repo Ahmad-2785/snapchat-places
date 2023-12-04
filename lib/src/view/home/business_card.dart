@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 
-class businessCard extends StatefulWidget {
-  const businessCard({super.key, required this.individualPlace});
+class BusinessCard extends StatefulWidget {
+  const BusinessCard({super.key, required this.individualPlace});
   final individualPlace;
   @override
-  State<businessCard> createState() => _businessCardState();
+  State<BusinessCard> createState() => _BusinessCardState();
 }
 
-class _businessCardState extends State<businessCard> {
+class _BusinessCardState extends State<BusinessCard> {
   String photoUri = "";
   Future getDetails() async {
-    print(">>>>>>>>>>>>>>>>>>");
     if (widget.individualPlace['photos'] == null) {
     } else {
       final photoName = widget.individualPlace['photos'][0]['name'];
@@ -42,7 +41,7 @@ class _businessCardState extends State<businessCard> {
             height: 76,
             padding: const EdgeInsets.all(2),
             decoration: ShapeDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.secondary,
               shape: RoundedRectangleBorder(
                 side: const BorderSide(width: 1, color: Color(0xFFECEEEF)),
                 borderRadius: BorderRadius.circular(76),
@@ -87,21 +86,11 @@ class _businessCardState extends State<businessCard> {
             children: [
               Text(
                 widget.individualPlace['displayName']['text'],
-                style: const TextStyle(
-                  color: Color(0xFF0F1D27),
-                  fontSize: 16,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(context).textTheme.titleSmall,
               ),
               Text(
                 widget.individualPlace['shortFormattedAddress'],
-                style: const TextStyle(
-                  color: Color(0xFFA7ACAF),
-                  fontSize: 14,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w400,
-                ),
+                style: Theme.of(context).textTheme.displaySmall,
               ),
             ],
           ))

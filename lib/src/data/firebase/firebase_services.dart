@@ -132,7 +132,7 @@ class FirebaseServices {
                   ),
                 ),
                 const Icon(
-                  IconData(0xf04be, fontFamily: 'MaterialIcons'),
+                  Icons.error,
                   color: Colors.red,
                 ));
             return;
@@ -161,7 +161,7 @@ class FirebaseServices {
               ),
             ),
             const Icon(
-              IconData(0xf04be, fontFamily: 'MaterialIcons'),
+              Icons.error,
               color: Colors.red,
             ));
         return;
@@ -189,7 +189,7 @@ class FirebaseServices {
             ),
           ),
           const Icon(
-            IconData(0xf04be, fontFamily: 'MaterialIcons'),
+            Icons.error,
             color: Colors.red,
           ));
     }

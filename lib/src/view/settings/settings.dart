@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snapchat/src/app_state.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
 
 class Settings extends StatefulWidget {
@@ -29,12 +31,13 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
     return Scaffold(
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFF8F9F9),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.background,
             ),
           ),
           SingleChildScrollView(
@@ -53,8 +56,9 @@ class _SettingsState extends State<Settings> {
                           width: 44,
                         ),
                         GestureDetector(
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_ios,
+                            color: Theme.of(context).colorScheme.onBackground,
                             size: 24,
                           ),
                           onTap: () {
@@ -64,61 +68,40 @@ class _SettingsState extends State<Settings> {
                         const SizedBox(
                           width: 20,
                         ),
-                        const Text(
-                          'Settings',
-                          style: TextStyle(
-                            color: Color(0xFF0F1D27),
-                            fontSize: 18,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w700,
-                            height: 0,
-                          ),
-                        ),
+                        Text('Settings',
+                            style: Theme.of(context).textTheme.titleLarge),
                       ],
                     ),
                   ),
                   const SizedBox(
                     height: 20,
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       'My account',
-                      style: TextStyle(
-                        color: Color(0xFF6155A6),
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        height: 0,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
                   const SizedBox(
                     height: 8,
                   ),
                   Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
                       border: Border(
-                        left: BorderSide(color: Color(0xFFECEEEF)),
-                        top: BorderSide(color: Color(0xFFECEEEF)),
-                        right: BorderSide(color: Color(0xFFECEEEF)),
-                        bottom: BorderSide(width: 1, color: Color(0xFFECEEEF)),
+                        bottom: BorderSide(
+                            width: 1,
+                            color: Theme.of(context).colorScheme.onSecondary),
                       ),
                     ),
                     padding: const EdgeInsets.all(20),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'User name',
-                          style: TextStyle(
-                            color: Color(0xFF0F1D27),
-                            fontSize: 16,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            height: 0,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Text(
                           _username,
@@ -137,30 +120,23 @@ class _SettingsState extends State<Settings> {
                   const SizedBox(
                     height: 16,
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       'More',
-                      style: TextStyle(
-                        color: Color(0xFF6155A6),
-                        fontSize: 14,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        height: 0,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ),
                   const SizedBox(
                     height: 8,
                   ),
                   Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
                       border: Border(
-                        left: BorderSide(color: Color(0xFFECEEEF)),
-                        top: BorderSide(color: Color(0xFFECEEEF)),
-                        right: BorderSide(color: Color(0xFFECEEEF)),
-                        bottom: BorderSide(width: 1, color: Color(0xFFECEEEF)),
+                        bottom: BorderSide(
+                            width: 1,
+                            color: Theme.of(context).colorScheme.onSecondary),
                       ),
                     ),
                     padding: const EdgeInsets.all(20),
@@ -168,23 +144,17 @@ class _SettingsState extends State<Settings> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Night mode',
-                          style: TextStyle(
-                            color: Color(0xFF0F1D27),
-                            fontSize: 16,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            height: 0,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Switch(
-                            inactiveTrackColor: const Color(0xFFC5C9CC),
-                            value: nightmode,
+                            inactiveTrackColor:
+                                Theme.of(context).colorScheme.primary,
+                            activeTrackColor: const Color(0xFFC5C9CC),
+                            value: appState.isDarkMode,
                             onChanged: (bool value) {
-                              setState(() {
-                                nightmode = value;
-                              });
+                              appState.updateTheme(value);
                             })
                       ],
                     ),
@@ -194,30 +164,22 @@ class _SettingsState extends State<Settings> {
                       Get.toNamed(Routes.termsAndConditions);
                     },
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
                         border: Border(
-                          left: BorderSide(color: Color(0xFFECEEEF)),
-                          top: BorderSide(color: Color(0xFFECEEEF)),
-                          right: BorderSide(color: Color(0xFFECEEEF)),
-                          bottom:
-                              BorderSide(width: 1, color: Color(0xFFECEEEF)),
+                          bottom: BorderSide(
+                              width: 1,
+                              color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
                       padding: const EdgeInsets.all(20),
                       height: 76,
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Terms and conditions',
-                            style: TextStyle(
-                              color: Color(0xFF0F1D27),
-                              fontSize: 16,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium,
                           ),
                         ],
                       ),
@@ -228,30 +190,22 @@ class _SettingsState extends State<Settings> {
                       Get.toNamed(Routes.privacyAndPolicy);
                     },
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
                         border: Border(
-                          left: BorderSide(color: Color(0xFFECEEEF)),
-                          top: BorderSide(color: Color(0xFFECEEEF)),
-                          right: BorderSide(color: Color(0xFFECEEEF)),
-                          bottom:
-                              BorderSide(width: 1, color: Color(0xFFECEEEF)),
+                          bottom: BorderSide(
+                              width: 1,
+                              color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
                       padding: const EdgeInsets.all(20),
                       height: 76,
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Privacy and policy',
-                            style: TextStyle(
-                              color: Color(0xFF0F1D27),
-                              fontSize: 16,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              height: 0,
-                            ),
+                            style: Theme.of(context).textTheme.labelMedium,
                           ),
                         ],
                       ),

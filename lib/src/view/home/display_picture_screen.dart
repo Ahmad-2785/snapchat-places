@@ -106,17 +106,21 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               height: 80,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.background,
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
                 border: Border(
-                  left: BorderSide(color: Color(0xFFECEEEF)),
-                  top: BorderSide(width: 1, color: Color(0xFFECEEEF)),
-                  right: BorderSide(color: Color(0xFFECEEEF)),
-                  bottom: BorderSide(color: Color(0xFFECEEEF)),
+                  left: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary),
+                  top: BorderSide(
+                      width: 1, color: Theme.of(context).colorScheme.secondary),
+                  right: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary),
+                  bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary),
                 ),
               ),
               child: Row(
@@ -131,14 +135,15 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                           const MaterialStatePropertyAll<EdgeInsetsGeometry>(
                               EdgeInsets.all(14)),
                       alignment: Alignment.center,
-                      backgroundColor:
-                          const MaterialStatePropertyAll(Color(0xFFEFEEF6)),
+                      backgroundColor: MaterialStatePropertyAll(
+                          Theme.of(context).colorScheme.onSecondary),
                       shape: MaterialStateProperty.all<OutlinedBorder>(
                         const CircleBorder(),
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.file_download_outlined,
+                      color: Theme.of(context).colorScheme.onBackground,
                       size: 20,
                     ),
                   ),

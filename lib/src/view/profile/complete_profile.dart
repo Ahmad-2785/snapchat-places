@@ -9,6 +9,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/view/home/home.dart';
 
 import '../../data/shared_pref/shared_pref.dart';
@@ -142,7 +143,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                           ]),
                         ),
                         const SizedBox(
-                          height: 16,
+                          height: 60,
                         ),
                         FormBuilder(
                           key: _formKey,
@@ -183,23 +184,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
                                   ),
                                 ]),
                               ),
-                              // const SizedBox(height: 10),
-                              // FormBuilderTextField(
-                              //   autovalidateMode: AutovalidateMode.onUserInteraction,
-                              //   name: 'email',
-                              //   decoration: CustomInputDecoration(
-                              //     'Enter recovery Email',
-                              //     Icon(
-                              //       Icons.mail_outline_outlined,
-                              //       color: Color(0xFFA7ACAF),
-                              //     ),
-
-                              //   ),
-                              //   validator: FormBuilderValidators.compose([
-                              //     FormBuilderValidators.required(),
-                              //     FormBuilderValidators.email(),
-                              //   ]),
-                              // ),
                               const SizedBox(height: 16),
                               const Text(
                                 'Recovery password',
@@ -336,7 +320,9 @@ class _CompleteProfileState extends State<CompleteProfile> {
                                         backgroundColor:
                                             MaterialStateProperty.all<Color>(
                                                 const Color(0xFFEFEEF6))),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Get.toNamed(Routes.recoveryProfile);
+                                    },
                                     child: Text(
                                       'Recovery',
                                       textAlign: TextAlign.center,
@@ -399,7 +385,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
       final uid = fireUser.uid;
       final username = _formKey.currentState?.value['username'];
       bool isTaken = await isUsernameTaken(username);
-      print(">>>>>>>>");
       print(isTaken);
       if (isTaken) {
         _formKey.currentState?.fields['username']
@@ -407,7 +392,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
         setState(() {});
         return;
       }
-      print("<<<<<<<<<");
       final password = _formKey.currentState?.value['password'];
       String extenstion = extension(_imageFile!.path);
       final firebaseStorageRef =

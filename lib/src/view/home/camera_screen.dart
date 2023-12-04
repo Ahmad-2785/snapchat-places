@@ -57,91 +57,88 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(children: [
-        Positioned.fill(
-          child: FutureBuilder(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return (!_controller.value.isInitialized)
-                    ? Container()
-                    : CameraPreview(_controller);
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            },
-          ),
+    return Stack(children: [
+      Positioned.fill(
+        child: FutureBuilder(
+          future: _initializeControllerFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return (!_controller.value.isInitialized)
+                  ? Container()
+                  : CameraPreview(_controller);
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
         ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: !videoRecord
-                ? FloatingActionButton(
-                    onPressed: () async {
-                      try {
-                        await _initializeControllerFuture;
+      ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: !videoRecord
+              ? FloatingActionButton(
+                  onPressed: () async {
+                    try {
+                      await _initializeControllerFuture;
 
-                        final image = await _controller.takePicture();
+                      final image = await _controller.takePicture();
 
-                        Get.toNamed(Routes.displayPicureScreen, arguments: {
-                          'imagePath': image.path,
-                          'placeId': widget.placeId
-                        });
-                      } catch (e) {
-                        print(e);
-                      }
-                    },
-                    child: const Icon(Icons.camera_alt),
-                  )
-                : FloatingActionButton(
-                    backgroundColor: Colors.red,
-                    child: Icon(_isRecording ? Icons.stop : Icons.circle),
-                    onPressed: () => _recordVideo(),
-                  ),
-          ),
-        ),
-        Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  videoRecord = !videoRecord;
-                });
-              },
-              child: Container(
-                width: 55,
-                height: 55,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                clipBehavior: Clip.antiAlias,
-                decoration: ShapeDecoration(
-                  color: Colors.black.withOpacity(0.23999999463558197),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(48),
-                  ),
+                      Get.toNamed(Routes.displayPicureScreen, arguments: {
+                        'imagePath': image.path,
+                        'placeId': widget.placeId
+                      });
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
+                  child: const Icon(Icons.camera_alt),
+                )
+              : FloatingActionButton(
+                  backgroundColor: Colors.red,
+                  child: Icon(_isRecording ? Icons.stop : Icons.circle),
+                  onPressed: () => _recordVideo(),
                 ),
-                child: !videoRecord
-                    ? const Icon(
-                        Icons.video_camera_back_outlined,
-                        size: 20,
-                        color: Colors.white,
-                      )
-                    : const Icon(
-                        Icons.camera_alt_outlined,
-                        size: 20,
-                        color: Colors.white,
-                      ),
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomLeft,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                videoRecord = !videoRecord;
+              });
+            },
+            child: Container(
+              width: 55,
+              height: 55,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              clipBehavior: Clip.antiAlias,
+              decoration: ShapeDecoration(
+                color: Colors.black.withOpacity(0.23999999463558197),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(48),
+                ),
               ),
+              child: !videoRecord
+                  ? const Icon(
+                      Icons.video_camera_back_outlined,
+                      size: 20,
+                      color: Colors.white,
+                    )
+                  : const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 20,
+                      color: Colors.white,
+                    ),
             ),
           ),
-        )
-      ]),
-    );
+        ),
+      )
+    ]);
   }
 }

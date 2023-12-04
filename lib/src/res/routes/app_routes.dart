@@ -10,6 +10,7 @@ import 'package:snapchat/src/view/settings/privacy_and_policy.dart';
 import 'package:snapchat/src/view/settings/settings.dart';
 import 'package:snapchat/src/view/settings/terms_and_conditions.dart';
 import 'package:snapchat/src/view/signin/components/otp_screen.dart';
+import 'package:snapchat/src/view/signin/recovery_profile.dart';
 import 'package:snapchat/src/view/signin/sign_in.dart';
 import 'package:snapchat/src/view/intro/splash.dart';
 
@@ -20,14 +21,13 @@ class AppRoutes {
     return [
       GetPage(name: Routes.intro, page: () => const SplashPage()),
       GetPage(name: Routes.signIn, page: () => const SignIn()),
-      GetPage(name: Routes.homePage, page: () => const HomePage()),
-      GetPage(name: Routes.settings, page: () => const Settings()),
-      GetPage(name: Routes.termsAndConditions, page: () => const TermsAndConditions()),
-      GetPage(name: Routes.privacyAndPolicy, page: () => const PrivacyAndPolicy()),
+      GetPage(name: Routes.otpScreen, page: () => const OtpScreen()),
       GetPage(
           name: Routes.completeProfile, page: () => const CompleteProfile()),
+      GetPage(
+          name: Routes.recoveryProfile, page: () => const RecoveryProfile()),
+      GetPage(name: Routes.homePage, page: () => const HomePage()),
       GetPage(name: Routes.details, page: () => const DetailPage()),
-      GetPage(name: Routes.otpScreen, page: () => const OtpScreen()),
       GetPage(
           name: Routes.displayPicureScreen,
           page: () => const DisplayPictureScreen()),
@@ -38,6 +38,12 @@ class AppRoutes {
           name: Routes.videoDetailView, page: () => const VideoDetailView()),
       GetPage(
           name: Routes.imageDetailView, page: () => const ImageDetailView()),
+      GetPage(name: Routes.settings, page: () => const Settings()),
+      GetPage(
+          name: Routes.termsAndConditions,
+          page: () => const TermsAndConditions()),
+      GetPage(
+          name: Routes.privacyAndPolicy, page: () => const PrivacyAndPolicy()),
     ];
   }
 }

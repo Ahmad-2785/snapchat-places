@@ -170,7 +170,7 @@ class PlacesServices {
     String markerIconUrl = getMarkerIconUrl(placeType);
     ByteData data = await rootBundle.load(markerIconUrl);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetHeight: 200);
+        targetHeight: 100, targetWidth: 100);
     ui.FrameInfo fi = await codec.getNextFrame();
 
     ByteData? byteData =
@@ -201,7 +201,7 @@ class PlacesServices {
         : 'assets/images/markers/targeted_location.png';
     ByteData data = await rootBundle.load(markerIconUrl);
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetHeight: 200, targetWidth: 200);
+        targetHeight: isMine ? 200 : 100, targetWidth: isMine ? 200 : 100);
     ui.FrameInfo fi = await codec.getNextFrame();
 
     ByteData? byteData =
@@ -221,6 +221,8 @@ class PlacesServices {
 
   static String getMarkerIconUrl(String placeType) {
     switch (placeType) {
+      case 'Culture':
+        return 'assets/images/markers/Culture.png';
       case 'Automotive':
         return 'assets/images/markers/Automotive.png';
       case 'Entertainment':
@@ -231,12 +233,18 @@ class PlacesServices {
         return 'assets/images/markers/Drink.png';
       case 'Health':
         return 'assets/images/markers/Health.png';
+      case 'Drug':
+        return 'assets/images/markers/Drug.png';
       case 'Lodging':
         return 'assets/images/markers/Lodging.png';
       case 'Worship':
         return 'assets/images/markers/Worship.png';
       case 'Shopping':
         return 'assets/images/markers/Shopping.png';
+      case 'Clothing':
+        return 'assets/images/markers/Clothing.png';
+      case 'Services':
+        return 'assets/images/markers/Services.png';
       case 'Sports':
         return 'assets/images/markers/Sports.png';
       default:
@@ -328,12 +336,14 @@ class PlacesServices {
       'dental_clinic',
       'dentist',
       'doctor',
-      'drugstore',
       'hospital',
       'medical_lab',
-      'pharmacy',
       'physiotherapist',
       'spa',
+    ];
+    List<String> drug = [
+      'drugstore',
+      'pharmacy',
     ];
     List<String> lodging = [
       'bed_and_breakfast',
@@ -362,7 +372,6 @@ class PlacesServices {
       'bicycle_store',
       'book_store',
       'cell_phone_store',
-      'clothing_store',
       'convenience_store',
       'department_store',
       'discount_store',
@@ -377,12 +386,15 @@ class PlacesServices {
       'liquor_store',
       'market',
       'pet_store',
-      'shoe_store',
       'shopping_mall',
       'sporting_goods_store',
       'store',
       'supermarket',
       'wholesaler',
+    ];
+    List<String> clothing = [
+      'clothing_store',
+      'shoe_store',
     ];
     List<String> services = [
       'barber_shop',
@@ -436,6 +448,8 @@ class PlacesServices {
       return 'Drink';
     } else if (health.contains(input)) {
       return 'Health';
+    } else if (drug.contains(input)) {
+      return 'Drug';
     } else if (lodging.contains(input)) {
       return 'Lodging';
     } else if (worship.contains(input)) {
@@ -444,6 +458,8 @@ class PlacesServices {
       return 'Services';
     } else if (shopping.contains(input)) {
       return 'Shopping';
+    } else if (clothing.contains(input)) {
+      return 'Clothing';
     } else if (sports.contains(input)) {
       return 'Sports';
     } else {
