@@ -3,7 +3,7 @@ import 'package:snapchat/src/data/google_map/places_services.dart';
 
 class BusinessCard extends StatefulWidget {
   const BusinessCard({super.key, required this.individualPlace});
-  final individualPlace;
+  final Map individualPlace;
   @override
   State<BusinessCard> createState() => _BusinessCardState();
 }

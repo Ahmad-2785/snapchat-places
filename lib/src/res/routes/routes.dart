@@ -20,6 +20,4 @@ class Routes {
   // usersetting
   static const userOptions = '/userOptions';
   static const userDetail = '/userDetail';
-  static const followings = '/followings';
-  static const followers = '/followers';
 }

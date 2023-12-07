@@ -39,7 +39,7 @@ class _RecoveryProfileState extends State<RecoveryProfile> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(
-                    height: 88,
+                    height: 98,
                     child: Center(
                         child: Text(
                       'Recovery',

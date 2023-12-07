@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
@@ -23,6 +27,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List _pendingFollowers = [];
+  late StreamSubscription<DatabaseEvent> _sub1;
   Map<String, Location> receivedLocation =
       Get.arguments ?? {"location": Location(lat: 0, lng: 0)};
   int _selectedIndex = 0;
@@ -55,10 +61,12 @@ class _HomePageState extends State<HomePage> {
           continue;
         }
         if (place['primaryType'] == null) {
+          print("<<<<<<<<<");
           continue;
         }
         String placeType = PlacesServices.getPlaceType(place['primaryType']);
         if (placeType == "Unknown") {
+          print("+++++++++");
           continue;
         }
         Marker newMarker = await PlacesServices.getMarker(place);
@@ -72,12 +80,34 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  getFollowers(DatabaseEvent event) async {
+    var value = event.snapshot.value;
+    List pendingFollowers = [];
+    if (value is Map) {
+      value.forEach((key, value) {
+        if (value['status'] == "pending") {
+          pendingFollowers.add(value['follower']);
+        }
+      });
+    }
+
+    setState(() {
+      _pendingFollowers = pendingFollowers;
+    });
+  }
+
   void goMyLocation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userKey = prefs.getString("USERKEY");
+    StreamSubscription<DatabaseEvent> sub1 = FirebaseDatabase.instance
+        .ref()
+        .child('Followings')
+        .orderByChild('following')
+        .equalTo(userKey)
+        .onValue
+        .listen(getFollowers);
+
     final mylocation = await PlacesServices.determinePosition();
-    // setState(() {
-    //   currentPos = CameraPosition(
-    //       target: LatLng(mylocation.latitude, mylocation.longitude), zoom: 15);
-    // });
     if (receivedLocation['location']!.lat == 0) {
       await _mapController.moveCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -100,6 +130,7 @@ class _HomePageState extends State<HomePage> {
       Marker myLocationMarker = await PlacesServices.getSpecialMarker(
           true, mylocation.latitude, mylocation.longitude);
       setState(() {
+        _sub1 = sub1;
         _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
         _showMarkers.add(newMarker);
         _showMarkers.add(myLocationMarker);
@@ -117,6 +148,12 @@ class _HomePageState extends State<HomePage> {
       });
     });
     goMyLocation();
+  }
+
+  @override
+  void dispose() {
+    _sub1.cancel();
+    super.dispose();
   }
 
   @override
@@ -183,6 +220,29 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
+              _pendingFollowers.isNotEmpty
+                  ? Positioned(
+                      top: 40,
+                      left: 40,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: ShapeDecoration(
+                          color: Colors.red.withOpacity(1),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(48),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "${_pendingFollowers.length}",
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(),
               Positioned(
                 top: 20,
                 right: 20,

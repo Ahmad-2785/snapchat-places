@@ -13,8 +13,6 @@ import 'package:snapchat/src/view/signin/components/otp_screen.dart';
 import 'package:snapchat/src/view/signin/recovery_profile.dart';
 import 'package:snapchat/src/view/signin/sign_in.dart';
 import 'package:snapchat/src/view/intro/splash.dart';
-import 'package:snapchat/src/view/users/followers.dart';
-import 'package:snapchat/src/view/users/followings.dart';
 import 'package:snapchat/src/view/users/user_detail.dart';
 import 'package:snapchat/src/view/users/user_options.dart';
 
@@ -55,8 +53,6 @@ class AppRoutes {
       //User
       GetPage(name: Routes.userOptions, page: () => const UserOptions()),
       GetPage(name: Routes.userDetail, page: () => const UserDetail()),
-      GetPage(name: Routes.followings, page: () => const Followings()),
-      GetPage(name: Routes.followers, page: () => const Followers()),
     ];
   }
 }

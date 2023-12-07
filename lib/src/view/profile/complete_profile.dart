@@ -58,7 +58,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(
-                    height: 88,
+                    height: 98,
                     child: Center(
                         child: Text(
                       'Complete profile',

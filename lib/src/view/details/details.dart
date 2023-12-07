@@ -149,42 +149,35 @@ class _DetailPageState extends State<DetailPage> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     width: double.infinity,
-                    height: 88,
+                    height: 98,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        const SizedBox(
+                          width: 24,
+                        ),
                         GestureDetector(
-                          child: SizedBox(
-                              width: 48,
-                              height: 48,
-                              child: Icon(
-                                Icons.arrow_back_ios,
-                                color:
-                                    Theme.of(context).colorScheme.onBackground,
-                                size: 24,
-                              )),
+                          child: Icon(
+                            Icons.arrow_back,
+                            color: Theme.of(context).colorScheme.onBackground,
+                            size: 24,
+                          ),
                           onTap: () {
                             Navigator.pop(context);
                           },
                         ),
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              'Details',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                          ),
-                        ),
                         const SizedBox(
-                          width: 48,
-                          height: 48,
+                          width: 24,
                         ),
+                        Text('Details',
+                            style: Theme.of(context).textTheme.titleLarge),
                       ],
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.only(left: 20, right: 20),
-                    height: 120,
+                    height: 80,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -306,9 +299,9 @@ class _DetailPageState extends State<DetailPage> {
                             style: ButtonStyle(
                               backgroundColor: MaterialStatePropertyAll(
                                   Theme.of(context).colorScheme.secondary),
-                              padding:
-                                  MaterialStatePropertyAll<EdgeInsetsGeometry>(
-                                      EdgeInsets.only(right: 24, left: 24)),
+                              padding: const MaterialStatePropertyAll<
+                                      EdgeInsetsGeometry>(
+                                  EdgeInsets.only(right: 24, left: 24)),
                             ),
                             onPressed: () {
                               followAction();

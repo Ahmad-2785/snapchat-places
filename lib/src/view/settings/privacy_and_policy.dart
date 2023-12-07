@@ -19,17 +19,17 @@ class PrivacyAndPolicy extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  height: 88,
+                  height: 98,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(
-                        width: 44,
+                        width: 24,
                       ),
                       GestureDetector(
                         child: Icon(
-                          Icons.arrow_back_ios,
+                          Icons.arrow_back,
                           color: Theme.of(context).colorScheme.onBackground,
                           size: 24,
                         ),
@@ -38,12 +38,10 @@ class PrivacyAndPolicy extends StatelessWidget {
                         },
                       ),
                       const SizedBox(
-                        width: 20,
+                        width: 24,
                       ),
-                      Text(
-                        'Privacy and policy',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
+                      Text('Privacy and policy',
+                          style: Theme.of(context).textTheme.titleLarge),
                     ],
                   ),
                 ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,6 +15,13 @@ class UserDetail extends StatefulWidget {
 class _UserDetailState extends State<UserDetail> {
   bool isLoading = true;
   final Map<String, dynamic> arguments = Get.arguments;
+  StreamSubscription<DatabaseEvent>? sub;
+  List _followers = [];
+  List _followings = [];
+  late StreamSubscription<DatabaseEvent> _sub1;
+  late StreamSubscription<DatabaseEvent> _sub2;
+  StreamSubscription<DatabaseEvent>? _sub3;
+  StreamSubscription<DatabaseEvent>? _sub4;
   String followStatus = "unfollow";
   String _myKey = "";
   String _userKey = "";
@@ -24,6 +33,16 @@ class _UserDetailState extends State<UserDetail> {
   void initState() {
     super.initState();
     getUserData();
+  }
+
+  @override
+  void dispose() {
+    sub?.cancel();
+    _sub1.cancel();
+    _sub2.cancel();
+    _sub3?.cancel();
+    _sub4?.cancel();
+    super.dispose();
   }
 
   void getUserData() async {
@@ -41,15 +60,14 @@ class _UserDetailState extends State<UserDetail> {
       username = user['username'];
       avatar = user['avatar'];
     }
-    // get ispublic in realtime
-    DatabaseReference ref2 = ref.child(arguments['userKey']).child('isPublic');
-    ref2.onValue.listen((DatabaseEvent event) {
-      final data = event.snapshot.value;
-      setState(() {
-        _isPublic = data as bool;
-      });
-    });
-    // get follow status
+    StreamSubscription<DatabaseEvent> sub1 = FirebaseDatabase.instance
+        .ref()
+        .child('Followings')
+        .orderByChild('follower')
+        .equalTo(arguments['userKey'])
+        .onValue
+        .listen(getFollowings);
+// get follow status
     DatabaseReference followRef =
         FirebaseDatabase.instance.ref().child('Followings');
     DatabaseEvent event =
@@ -58,19 +76,32 @@ class _UserDetailState extends State<UserDetail> {
     if (snapshotValue is Map) {
       snapshotValue.forEach((key, value) {
         if (value['following'] == arguments['userKey']) {
-          DatabaseReference ref3 = followRef.child(key).child('status');
-          ref3.onValue.listen((DatabaseEvent event) {
-            String data = event.snapshot.value != null
-                ? event.snapshot.value as String
-                : "unfollow";
-            setState(() {
-              followStatus = data;
-            });
+          setState(() {
+            _sub4 = followRef
+                .child(key)
+                .child('status')
+                .onValue
+                .listen(unfollowActionStatus);
           });
         }
       });
     }
+
     setState(() {
+      // get ispublic in realtime
+      sub = ref
+          .child(arguments['userKey'])
+          .child('isPublic')
+          .onValue
+          .listen(getPublicStatus);
+      _sub1 = sub1;
+      _sub2 = FirebaseDatabase.instance
+          .ref()
+          .child('Followings')
+          .orderByChild('following')
+          .equalTo(arguments['userKey'])
+          .onValue
+          .listen(getFollowers);
       _myKey = myKey;
       _username = username;
       _avatar = avatar;
@@ -79,8 +110,309 @@ class _UserDetailState extends State<UserDetail> {
     });
   }
 
+  void unfollowActionStatus(DatabaseEvent event) {
+    String data = event.snapshot.value != null
+        ? event.snapshot.value as String
+        : "unfollow";
+    setState(() {
+      followStatus = data;
+    });
+  }
+
+  void followActionStatus(DatabaseEvent event) {
+    String data = event.snapshot.value != null
+        ? event.snapshot.value as String
+        : "unfollow";
+    setState(() {
+      followStatus = data;
+    });
+  }
+
+  void followAction() async {
+    switch (followStatus) {
+      case "unfollow":
+        String status = _isPublic ? "follow" : "pending";
+        DatabaseReference newEntryRef =
+            FirebaseDatabase.instance.ref().child('Followings').push();
+        Map<String, dynamic> newData = {
+          'follower': _myKey,
+          'following': _userKey,
+          'status': status,
+        };
+        String dataKey = newEntryRef.key ?? "";
+        DatabaseReference ref = FirebaseDatabase.instance
+            .ref()
+            .child('Followings')
+            .child(dataKey)
+            .child('status');
+        newEntryRef.set(newData).then((_) => {
+              setState(() {
+                _sub3 = ref.onValue.listen(followActionStatus);
+              })
+            });
+
+        break;
+      default:
+        DatabaseReference followRef =
+            FirebaseDatabase.instance.ref().child('Followings');
+        DatabaseEvent event =
+            await followRef.orderByChild('follower').equalTo(_myKey).once();
+        dynamic snapshotValue = event.snapshot.value;
+        if (snapshotValue is Map) {
+          snapshotValue.forEach((key, value) {
+            if (value['following'] == _userKey) {
+              FirebaseDatabase.instance
+                  .ref()
+                  .child('Followings')
+                  .child(key)
+                  .remove();
+            }
+          });
+        }
+        break;
+    }
+  }
+
+  getFollowers(DatabaseEvent event) async {
+    var value = event.snapshot.value;
+    List followers = [];
+    if (value is Map) {
+      value.forEach((key, value) {
+        if (value['status'] == "follow") {
+          followers.add(value['follower']);
+        }
+      });
+    }
+
+    setState(() {
+      _followers = followers;
+    });
+  }
+
+  getFollowings(DatabaseEvent event) async {
+    var value = event.snapshot.value;
+    List followings = [];
+    if (value is Map) {
+      value.forEach((key, value) {
+        if (value['status'] == "follow") {
+          followings.add(value['following']);
+        }
+      });
+    }
+
+    setState(() {
+      _followings = followings;
+    });
+  }
+
+  void getPublicStatus(DatabaseEvent event) {
+    final data = event.snapshot.value;
+    setState(() {
+      _isPublic = data as bool;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 98,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 24,
+                      ),
+                      GestureDetector(
+                        child: Icon(
+                          Icons.arrow_back,
+                          color: Theme.of(context).colorScheme.onBackground,
+                          size: 24,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      const SizedBox(
+                        width: 24,
+                      ),
+                      Text('User info',
+                          style: Theme.of(context).textTheme.titleLarge),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                SizedBox(
+                  height: 120,
+                  child: Stack(children: [
+                    Center(
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: const ShapeDecoration(
+                          color: Color(0xFFFFF7FC),
+                          shape: OvalBorder(
+                              side: BorderSide(
+                                  width: 1, color: Color(0xFFECEEEF))),
+                        ),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 96,
+                          backgroundImage: NetworkImage(_avatar),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 80,
+                      left: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: followAction,
+                        child: Container(
+                          padding: EdgeInsets.only(left: 50),
+                          child: CircleAvatar(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.tertiary,
+                            radius: 20,
+                            child: followStatus == "unfollow"
+                                ? const Icon(
+                                    Icons.favorite_outline,
+                                    color: Color(0xFFFFABE1),
+                                    size: 24,
+                                  )
+                                : followStatus == "follow"
+                                    ? const Icon(
+                                        Icons.favorite,
+                                        color: Color(0xFFFFABE1),
+                                        size: 24,
+                                      )
+                                    : const Icon(
+                                        Icons.pending_actions,
+                                        color: Color(0xFFFFABE1),
+                                        size: 24,
+                                      ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _username,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: Color(0xFFA7ACAF),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        height: 0,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _isPublic ? "Public" : "Private",
+                      style: TextStyle(
+                        color: _isPublic
+                            ? const Color(0xFF26B468)
+                            : const Color(0xFFFD363B),
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        height: 0.09,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.people_alt,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+                    Text(
+                      " ${_followers.length} ",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      " followers ",
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                    Text(
+                      '\u2022',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      " ${_followings.length} ",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      " following",
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    'User privacy',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
+                      border: Border(
+                        bottom: BorderSide(
+                            width: 1,
+                            color: Theme.of(context).colorScheme.onSecondary),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    height: 76,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Public',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 }
