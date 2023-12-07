@@ -246,12 +246,10 @@ class _DetailPageState extends State<DetailPage> {
                               style: Theme.of(context).textTheme.displaySmall,
                             ),
                             openNow
-                                ? Text(
+                                ? const Text(
                                     'Open now',
                                     style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onBackground,
+                                      color: Color(0xFF26B468),
                                       fontSize: 14,
                                       fontFamily: 'Inter',
                                       fontWeight: FontWeight.w400,

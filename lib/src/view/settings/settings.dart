@@ -15,6 +15,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   String _username = "";
   bool nightmode = true;
+  String _avatar = "";
   @override
   void initState() {
     super.initState();
@@ -24,8 +25,10 @@ class _SettingsState extends State<Settings> {
   getInitialData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final username = prefs.getString("USERNAME");
+    final avatar = prefs.getString("AVATARURL");
     setState(() {
       _username = username ?? "";
+      _avatar = avatar ?? "";
     });
   }
 
@@ -72,6 +75,31 @@ class _SettingsState extends State<Settings> {
                             style: Theme.of(context).textTheme.titleLarge),
                       ],
                     ),
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  SizedBox(
+                    height: 100,
+                    child: Stack(children: [
+                      Center(
+                        child: Container(
+                          width: 96,
+                          height: 96,
+                          decoration: const ShapeDecoration(
+                            color: Color(0xFFFFF7FC),
+                            shape: OvalBorder(
+                                side: BorderSide(
+                                    width: 1, color: Color(0xFFECEEEF))),
+                          ),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 96,
+                            backgroundImage: NetworkImage(_avatar),
+                          ),
+                        ),
+                      ),
+                    ]),
                   ),
                   const SizedBox(
                     height: 20,

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
@@ -42,10 +41,10 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   }
 
   uploadImage() async {
-    final fireUser = FirebaseAuth.instance.currentUser;
-    print(arguments['placeId']);
-    final providerID = fireUser!.providerData[0].providerId;
-    final uid = fireUser.uid;
+    // final fireUser = FirebaseAuth.instance.currentUser;
+    // print(arguments['placeId']);
+    // final providerID = fireUser!.providerData[0].providerId;
+    // final uid = fireUser.uid;
     final firebaseStorageRef = FirebaseStorage.instance
         .ref()
         .child('stories')

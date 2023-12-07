@@ -13,6 +13,10 @@ import 'package:snapchat/src/view/signin/components/otp_screen.dart';
 import 'package:snapchat/src/view/signin/recovery_profile.dart';
 import 'package:snapchat/src/view/signin/sign_in.dart';
 import 'package:snapchat/src/view/intro/splash.dart';
+import 'package:snapchat/src/view/users/followers.dart';
+import 'package:snapchat/src/view/users/followings.dart';
+import 'package:snapchat/src/view/users/user_detail.dart';
+import 'package:snapchat/src/view/users/user_options.dart';
 
 import 'routes.dart';
 
@@ -20,14 +24,15 @@ class AppRoutes {
   static List<GetPage> routes() {
     return [
       GetPage(name: Routes.intro, page: () => const SplashPage()),
+      //auth
       GetPage(name: Routes.signIn, page: () => const SignIn()),
       GetPage(name: Routes.otpScreen, page: () => const OtpScreen()),
       GetPage(
           name: Routes.completeProfile, page: () => const CompleteProfile()),
       GetPage(
           name: Routes.recoveryProfile, page: () => const RecoveryProfile()),
+      //Home
       GetPage(name: Routes.homePage, page: () => const HomePage()),
-      GetPage(name: Routes.details, page: () => const DetailPage()),
       GetPage(
           name: Routes.displayPicureScreen,
           page: () => const DisplayPictureScreen()),
@@ -38,12 +43,20 @@ class AppRoutes {
           name: Routes.videoDetailView, page: () => const VideoDetailView()),
       GetPage(
           name: Routes.imageDetailView, page: () => const ImageDetailView()),
+      //Business Detail
+      GetPage(name: Routes.details, page: () => const DetailPage()),
+      //Settings
       GetPage(name: Routes.settings, page: () => const Settings()),
       GetPage(
           name: Routes.termsAndConditions,
           page: () => const TermsAndConditions()),
       GetPage(
           name: Routes.privacyAndPolicy, page: () => const PrivacyAndPolicy()),
+      //User
+      GetPage(name: Routes.userOptions, page: () => const UserOptions()),
+      GetPage(name: Routes.userDetail, page: () => const UserDetail()),
+      GetPage(name: Routes.followings, page: () => const Followings()),
+      GetPage(name: Routes.followers, page: () => const Followers()),
     ];
   }
 }

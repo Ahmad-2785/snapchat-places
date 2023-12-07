@@ -107,40 +107,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _showBackDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Are you sure?'),
-          content: const Text(
-            'Are you sure you want to leave this page?',
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Nevermind'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Leave'),
-              onPressed: () {
-                SystemNavigator.pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -158,48 +124,7 @@ class _HomePageState extends State<HomePage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (bool didPop) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              elevation: 1,
-              backgroundColor: Theme.of(context).colorScheme.background,
-              title: Text(
-                'Are you sure?',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              content: Text(
-                'Are you sure you want to exist app?',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              actions: <Widget>[
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: Text(
-                    'Nevermind',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  child: const Text('Exist'),
-                  onPressed: () {
-                    print("<<<<<<<<");
-                    Navigator.of(context).pop(true);
-                    SystemNavigator.pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
+        showBackDialog(context);
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -225,6 +150,38 @@ class _HomePageState extends State<HomePage> {
                   updateMarkers(position);
                 },
                 markers: _showMarkers,
+              ),
+              Positioned(
+                top: 20,
+                left: 20,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.toNamed(Routes.userOptions);
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: ShapeDecoration(
+                      color: Colors.black.withOpacity(0.23999999463558197),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(48),
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                          width: 20,
+                          height: 20,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: const BoxDecoration(),
+                          child: const Icon(
+                            Icons.person_outlined,
+                            size: 20,
+                            color: Colors.white,
+                          )),
+                    ),
+                  ),
+                ),
               ),
               Positioned(
                 top: 20,
@@ -365,6 +322,51 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> showBackDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          elevation: 1,
+          backgroundColor: Theme.of(context).colorScheme.background,
+          title: Text(
+            'Are you sure?',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          content: Text(
+            'Are you sure you want to exist app?',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: Text(
+                'Nevermind',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Exist'),
+              onPressed: () {
+                print("<<<<<<<<");
+                Navigator.of(context).pop(true);
+                SystemNavigator.pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

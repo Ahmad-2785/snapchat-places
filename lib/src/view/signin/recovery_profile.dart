@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -186,12 +187,23 @@ class _RecoveryProfileState extends State<RecoveryProfile> {
       final uid = fireUser.uid;
       final username = _formKey.currentState?.value['username'];
       final password = _formKey.currentState?.value['password'];
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .where('username', isEqualTo: username)
-          .where('password', isEqualTo: password)
-          .get();
-      if (snapshot.docs.isEmpty) {
+
+      final DatabaseReference databaseReference =
+          FirebaseDatabase.instance.ref();
+      DatabaseReference usersRef = databaseReference.child('Users');
+      DatabaseEvent event =
+          await usersRef.orderByChild('username').equalTo(username).once();
+      DataSnapshot snapshot = event.snapshot;
+      dynamic snapshotValue = snapshot.value;
+      var user = {};
+      if (snapshotValue is Map) {
+        snapshotValue.forEach((key, value) {
+          if (value['password'] == password) {
+            user = value;
+          }
+        });
+      }
+      if (user['username'] == null) {
         Utils.showSnackBar(
             const Text(
               'Error',
@@ -219,16 +231,19 @@ class _RecoveryProfileState extends State<RecoveryProfile> {
             ));
         return;
       }
-      final data = snapshot.docs[0].data() as Map<String, dynamic>;
-      final avatar = data['avatar'];
-      FirebaseFirestore.instance.collection('Users').add({
+
+      DatabaseReference newEntryRef = databaseReference.child('Users').push();
+      Map<String, dynamic> newData = {
         'uid': uid,
         'username': username,
         'provider': providerID,
         'password': password,
-        'avatar': avatar
-      }).then((DocumentReference doc) {
-        UserPref.setUser(uid, username, avatar);
+        'avatar': user['avatar'],
+        'isPublic': user['isPublic'],
+      };
+      newEntryRef.set(newData).then((_) {
+        UserPref.setUser(newEntryRef.key ?? "", uid, username, user['avatar'],
+            user['isPublic']);
         Get.offAll(() => const HomePage());
       }).onError((error, stackTrace) {
         return;

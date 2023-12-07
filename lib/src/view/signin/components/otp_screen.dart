@@ -8,8 +8,6 @@ import 'package:snapchat/src/view/profile/complete_profile.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 
-import '../../../res/routes/routes.dart';
-
 class OtpScreen extends StatefulWidget {
   const OtpScreen({
     super.key,
