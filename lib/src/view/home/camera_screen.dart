@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
 
 class CameraScreen extends StatefulWidget {

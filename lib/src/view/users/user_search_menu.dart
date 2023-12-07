@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:get/get.dart';
 import 'package:snapchat/src/data/users/users_services.dart';
-import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/view/profile/components/custom_input_decoration.dart';
 import 'package:snapchat/src/view/users/UserCard.dart';
 
