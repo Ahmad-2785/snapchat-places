@@ -23,9 +23,9 @@ class _BusinessCardState extends State<BusinessCard> {
 
   @override
   void initState() {
-    super.initState();
     getDetails();
     photoUri = "";
+    super.initState();
   }
 
   @override

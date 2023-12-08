@@ -26,11 +26,11 @@ class _CompleteProfileState extends State<CompleteProfile> {
   final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
   @override
   void initState() {
-    super.initState();
     setState(() {
       isLoading = true;
     });
     checkPreviousProfile();
+    super.initState();
   }
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -441,8 +441,6 @@ class _CompleteProfileState extends State<CompleteProfile> {
         'isPublic': true,
       };
       String userKey = newEntryRef.key ?? "";
-      print(">>>>>>>>");
-      print(userKey);
       newEntryRef.set(newData).then((_) {
         UserPref.setUser(userKey, uid, username, downloadURL, true);
         setState(() {

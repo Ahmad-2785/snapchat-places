@@ -29,10 +29,10 @@ class _UserCardState extends State<UserCard> {
   late StreamSubscription<DatabaseEvent> _sub3;
   @override
   void initState() {
-    super.initState();
     Future.delayed(Duration.zero, () {
       getUserInfo();
     });
+    super.initState();
   }
 
   @override

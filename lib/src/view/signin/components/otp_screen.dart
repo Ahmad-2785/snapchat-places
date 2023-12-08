@@ -40,10 +40,10 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   void initState() {
-    super.initState();
     newResendToken = data['resendToken'];
     newreceivedID = data['receivedID'];
     phoneNumber = data['phoneNumber'];
+    super.initState();
   }
 
   @override

@@ -25,7 +25,7 @@ class _PlaceSearchMenuState extends State<PlaceSearchMenu> {
       var filteredPlaces = [];
       if (places != null) {
         for (var place in places) {
-          if (!PlacesServices.includedTypes().contains(place['primaryType'])) {
+          if (place['primaryType'] == null) {
             continue;
           }
           filteredPlaces.add(place);

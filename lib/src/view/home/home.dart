@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
+import 'package:snapchat/src/data/model/place_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/util/reusable_methods.dart';
@@ -61,12 +61,10 @@ class _HomePageState extends State<HomePage> {
           continue;
         }
         if (place['primaryType'] == null) {
-          print("<<<<<<<<<");
           continue;
         }
         String placeType = PlacesServices.getPlaceType(place['primaryType']);
         if (placeType == "Unknown") {
-          print("+++++++++");
           continue;
         }
         Marker newMarker = await PlacesServices.getMarker(place);
@@ -140,7 +138,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    super.initState();
     SplashServices.checkProfile();
     SchedulerBinding.instance.addPostFrameCallback((_) {
       rootBundle.loadString(FileConstants.mapStyle).then((string) {
@@ -148,6 +145,7 @@ class _HomePageState extends State<HomePage> {
       });
     });
     goMyLocation();
+    super.initState();
   }
 
   @override
@@ -172,13 +170,13 @@ class _HomePageState extends State<HomePage> {
               GoogleMap(
                 mapType: MapType.normal,
                 zoomControlsEnabled: false,
-                // myLocationEnabled: true,
+                compassEnabled: false,
                 initialCameraPosition: currentPos,
                 onMapCreated: (GoogleMapController controller) {
                   _mapController = controller;
                   _mapController.setMapStyle(_mapStyle);
                 },
-                minMaxZoomPreference: const MinMaxZoomPreference(14, 20),
+                minMaxZoomPreference: const MinMaxZoomPreference(14, 22),
                 mapToolbarEnabled: false,
                 onTap: (LatLng latLng) {
                   print(latLng);
@@ -419,7 +417,6 @@ class _HomePageState extends State<HomePage> {
               ),
               child: const Text('Exist'),
               onPressed: () {
-                print("<<<<<<<<");
                 Navigator.of(context).pop(true);
                 SystemNavigator.pop();
               },
@@ -488,10 +485,6 @@ class _HomePageState extends State<HomePage> {
                           itemCount: uniqueList.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Card(
-                              // clipBehavior is necessary because, without it, the InkWell's animation
-                              // will extend beyond the rounded edges of the [Card] (see https://github.com/flutter/flutter/issues/109776)
-                              // This comes with a small performance cost, and you should not set [clipBehavior]
-                              // unless you need it.
                               clipBehavior: Clip.hardEdge,
                               color: Theme.of(context).colorScheme.secondary,
                               elevation: 0,

@@ -20,4 +20,6 @@ class Routes {
   // usersetting
   static const userOptions = '/userOptions';
   static const userDetail = '/userDetail';
+  static const imageDisplay = '/imageDisplay';
+  static const videoDisplay = '/videoDisplay';
 }

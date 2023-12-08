@@ -13,8 +13,10 @@ import 'package:snapchat/src/view/signin/components/otp_screen.dart';
 import 'package:snapchat/src/view/signin/recovery_profile.dart';
 import 'package:snapchat/src/view/signin/sign_in.dart';
 import 'package:snapchat/src/view/intro/splash.dart';
+import 'package:snapchat/src/view/users/image_display.dart';
 import 'package:snapchat/src/view/users/user_detail.dart';
 import 'package:snapchat/src/view/users/user_options.dart';
+import 'package:snapchat/src/view/users/video_display.dart';
 
 import 'routes.dart';
 
@@ -53,6 +55,8 @@ class AppRoutes {
       //User
       GetPage(name: Routes.userOptions, page: () => const UserOptions()),
       GetPage(name: Routes.userDetail, page: () => const UserDetail()),
+      GetPage(name: Routes.imageDisplay, page: () => const ImageDisplay()),
+      GetPage(name: Routes.videoDisplay, page: () => const VideoDisplay()),
     ];
   }
 }

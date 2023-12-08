@@ -4,6 +4,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snapchat/src/res/routes/routes.dart';
+import 'package:snapchat/src/view/details/video_play.dart';
 
 class UserDetail extends StatefulWidget {
   const UserDetail({super.key});
@@ -23,6 +25,7 @@ class _UserDetailState extends State<UserDetail> {
   StreamSubscription<DatabaseEvent>? _sub3;
   StreamSubscription<DatabaseEvent>? _sub4;
   String followStatus = "unfollow";
+  List<Map> _stories = [];
   String _myKey = "";
   String _userKey = "";
   String _username = "";
@@ -31,8 +34,8 @@ class _UserDetailState extends State<UserDetail> {
 
   @override
   void initState() {
-    super.initState();
     getUserData();
+    super.initState();
   }
 
   @override
@@ -53,12 +56,14 @@ class _UserDetailState extends State<UserDetail> {
     //get user data
     String username = "";
     String avatar = "";
+    String userUid = "";
     DatabaseReference ref = FirebaseDatabase.instance.ref().child('Users');
     DataSnapshot snapshot = await ref.child(arguments['userKey']).get();
     final user = snapshot.value;
     if (user is Map) {
       username = user['username'];
       avatar = user['avatar'];
+      userUid = user['uid'];
     }
     StreamSubscription<DatabaseEvent> sub1 = FirebaseDatabase.instance
         .ref()
@@ -86,7 +91,19 @@ class _UserDetailState extends State<UserDetail> {
         }
       });
     }
-
+    // get stories data
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+    DatabaseReference usersRef = databaseReference.child('Stories');
+    DatabaseEvent event2 =
+        await usersRef.orderByChild('userUid').equalTo(userUid).once();
+    DataSnapshot snapshot2 = event2.snapshot;
+    dynamic snapshotValue2 = snapshot2.value;
+    List<Map> stories = [];
+    if (snapshotValue2 is Map) {
+      snapshotValue2.forEach((key, value) {
+        stories.add(value);
+      });
+    }
     setState(() {
       // get ispublic in realtime
       sub = ref
@@ -102,6 +119,7 @@ class _UserDetailState extends State<UserDetail> {
           .equalTo(arguments['userKey'])
           .onValue
           .listen(getFollowers);
+      _stories = stories;
       _myKey = myKey;
       _username = username;
       _avatar = avatar;
@@ -376,39 +394,113 @@ class _UserDetailState extends State<UserDetail> {
                   ],
                 ),
                 const SizedBox(
-                  height: 30,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    'User privacy',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ),
-                const SizedBox(
                   height: 8,
                 ),
                 Expanded(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      border: Border(
-                        bottom: BorderSide(
-                            width: 1,
-                            color: Theme.of(context).colorScheme.onSecondary),
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(20),
-                    height: 76,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Public',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                      ],
-                    ),
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(
+                        left: 20, right: 20, top: 0, bottom: 20),
+                    child: (!_isPublic && followStatus != "follow")
+                        ? Center(
+                            child: Text(
+                              "User's profile is private",
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          )
+                        : _stories.isNotEmpty
+                            ? FutureBuilder<List<Map>>(
+                                future: Future.value(_stories),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    return GridView.builder(
+                                        itemCount: snapshot.data?.length,
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 3,
+                                                childAspectRatio: 0.6),
+                                        itemBuilder: (context, index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 8,
+                                                right: 8,
+                                                bottom: 16,
+                                                top: 0),
+                                            child: snapshot.data![index]
+                                                        ['contentType'] ==
+                                                    'image/jpeg'
+                                                ? GestureDetector(
+                                                    onTap: () {
+                                                      Get.toNamed(
+                                                          Routes.imageDisplay,
+                                                          arguments: {
+                                                            'placeData':
+                                                                snapshot.data![
+                                                                    index],
+                                                          });
+                                                    },
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                        image: DecorationImage(
+                                                            image: NetworkImage(
+                                                                snapshot.data![
+                                                                        index]
+                                                                    ['url']),
+                                                            fit: BoxFit.cover),
+                                                      ),
+                                                    ),
+                                                  )
+                                                : GestureDetector(
+                                                    onTap: () {
+                                                      Get.toNamed(
+                                                          Routes.videoDisplay,
+                                                          arguments: {
+                                                            'placeData':
+                                                                snapshot.data![
+                                                                    index],
+                                                          });
+                                                    },
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
+                                                      clipBehavior:
+                                                          Clip.antiAlias,
+                                                      child: Stack(
+                                                        alignment: Alignment
+                                                            .bottomLeft,
+                                                        children: [
+                                                          VideoPlay(
+                                                              pathh: snapshot
+                                                                      .data![
+                                                                  index]['url']),
+                                                          const Icon(
+                                                            Icons.play_arrow,
+                                                            size: 20,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                          );
+                                        });
+                                  }
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                },
+                              )
+                            : Center(
+                                child: Text(
+                                  "There is no story",
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                              ),
                   ),
                 ),
               ],

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
-import 'package:snapchat/src/data/model/pharmacy_details_model.dart';
+import 'package:snapchat/src/data/model/place_details_model.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/view/details/stories.dart';
 import 'package:snapchat/src/view/details/working_hours.dart';
@@ -35,8 +35,6 @@ class _DetailPageState extends State<DetailPage> {
   List<dynamic> weekdayDescriptions = [];
 
   void followAction() async {
-    print(">>>>>>>");
-    print(placeId);
     if (isFollowed == true) {
       QuerySnapshot querySnapshot = await firestore
           .collection('Following')
@@ -128,10 +126,10 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
-    super.initState();
     isLoading = true;
     placeId = arguments['placeID'];
     getPlacedetails(arguments['placeID']);
+    super.initState();
   }
 
   @override
@@ -177,7 +175,7 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                   Container(
                     padding: const EdgeInsets.only(left: 20, right: 20),
-                    height: 80,
+                    height: 100,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
@@ -17,6 +19,7 @@ class DisplayVideoScreen extends StatefulWidget {
 
 class _DisplayVideoScreenState extends State<DisplayVideoScreen> {
   Map<String, dynamic> arguments = Get.arguments;
+  bool isLoading = false;
   late VideoPlayerController _videoPlayerController;
 
   void saveVideo() async {
@@ -40,19 +43,41 @@ class _DisplayVideoScreenState extends State<DisplayVideoScreen> {
   }
 
   uploadVideo() async {
-    // final fireUser = FirebaseAuth.instance.currentUser;
-    // print(arguments['placeId']);
-    // final providerID = fireUser!.providerData[0].providerId;
-    // final uid = fireUser.uid;
+    setState(() {
+      isLoading = true;
+    });
+    final fireUser = FirebaseAuth.instance.currentUser;
+    final uid = fireUser!.uid;
     final firebaseStorageRef = FirebaseStorage.instance
         .ref()
         .child('stories')
         .child('${arguments['placeId']}/${DateTime.now()}');
 
-    await firebaseStorageRef.putFile(File(arguments['filePath']!));
-
-    Future.delayed(Duration.zero, () {
+    final metaData = SettableMetadata(
+      contentType: 'video/mp4', // Set the desired content type here
+    );
+    final uploadTask =
+        firebaseStorageRef.putFile(File(arguments['filePath']!), metaData);
+    final taskSnapshot = await uploadTask.whenComplete(() {});
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+    DatabaseReference newEntryRef =
+        FirebaseDatabase.instance.ref().child('Stories').push();
+    Map<String, dynamic> newData = {
+      'userUid': uid,
+      'placeId': arguments['placeId'],
+      'url': downloadURL,
+      'contentType': 'video/mp4',
+    };
+    newEntryRef.set(newData).then((_) {
+      setState(() {
+        isLoading = false;
+      });
       Navigator.pop(context);
+    }).onError((error, stackTrace) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
     });
   }
 
@@ -198,6 +223,28 @@ class _DisplayVideoScreenState extends State<DisplayVideoScreen> {
               ),
             ),
           ),
+          isLoading
+              ? Positioned.fill(
+                  child: Container(
+                    color: const Color(0xFF8B9296).withOpacity(0.8),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(30),
+                        width: 100,
+                        height: 100,
+                        decoration: ShapeDecoration(
+                          // color: Color.fromARGB(255, 41, 3, 255).withOpacity(0.2),
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        child: const CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox()
         ],
       ),
     );

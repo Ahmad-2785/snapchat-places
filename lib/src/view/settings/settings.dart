@@ -19,8 +19,8 @@ class _SettingsState extends State<Settings> {
   String _avatar = "";
   @override
   void initState() {
-    super.initState();
     getInitialData();
+    super.initState();
   }
 
   getInitialData() async {

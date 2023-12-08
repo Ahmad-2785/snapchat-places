@@ -63,6 +63,21 @@ class PlacesServices {
     }
   }
 
+  static getPlaceSimpleData(String placeId) async {
+    String url = 'https://places.googleapis.com/v1/places/$placeId';
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg',
+      'X-Goog-FieldMask': 'id,displayName,location',
+    };
+    http.Response response = await http.get(Uri.parse(url), headers: headers);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      print('Request failed with status code ${response.statusCode}');
+    }
+  }
+
   static getPlacesBySearch(text) async {
     const String url = 'https://places.googleapis.com/v1/places:searchText';
     const String apiKey = 'AIzaSyAuiY-se4dvIZJNPHFGlkR42DqfxC-BLUg';
@@ -85,6 +100,9 @@ class PlacesServices {
         headers: headers,
         body: jsonEncode(data),
       );
+      print(">>>>");
+      print(response.body);
+
       return jsonDecode(response.body)['places'];
     } catch (e) {
       print('Error: $e');

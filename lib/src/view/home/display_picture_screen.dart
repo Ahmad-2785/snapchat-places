@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
@@ -17,6 +19,7 @@ class DisplayPictureScreen extends StatefulWidget {
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   Map<String, dynamic> arguments = Get.arguments;
+  bool isLoading = false;
 
   void saveImage() async {
     try {
@@ -41,21 +44,42 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   }
 
   uploadImage() async {
-    // final fireUser = FirebaseAuth.instance.currentUser;
-    // print(arguments['placeId']);
-    // final providerID = fireUser!.providerData[0].providerId;
-    // final uid = fireUser.uid;
+    setState(() {
+      isLoading = true;
+    });
+    final fireUser = FirebaseAuth.instance.currentUser;
+    final uid = fireUser!.uid;
+
     final firebaseStorageRef = FirebaseStorage.instance
         .ref()
         .child('stories')
         .child('${arguments['placeId']}/${DateTime.now()}');
-    final metadata = SettableMetadata(
+    final metaData = SettableMetadata(
       contentType: 'image/jpeg', // Set the desired content type here
     );
-    await firebaseStorageRef.putFile(File(arguments['imagePath']!), metadata);
+    final uploadTask =
+        firebaseStorageRef.putFile(File(arguments['imagePath']!), metaData);
+    final taskSnapshot = await uploadTask.whenComplete(() {});
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
-    Future.delayed(Duration.zero, () {
+    DatabaseReference newEntryRef =
+        FirebaseDatabase.instance.ref().child('Stories').push();
+    Map<String, dynamic> newData = {
+      'userUid': uid,
+      'placeId': arguments['placeId'],
+      'url': downloadURL,
+      'contentType': 'image/jpeg',
+    };
+    newEntryRef.set(newData).then((_) {
+      setState(() {
+        isLoading = false;
+      });
       Navigator.pop(context);
+    }).onError((error, stackTrace) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
     });
   }
 
@@ -185,6 +209,28 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
               ),
             ),
           ),
+          isLoading
+              ? Positioned.fill(
+                  child: Container(
+                    color: const Color(0xFF8B9296).withOpacity(0.8),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(30),
+                        width: 100,
+                        height: 100,
+                        decoration: ShapeDecoration(
+                          // color: Color.fromARGB(255, 41, 3, 255).withOpacity(0.2),
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        child: const CircularProgressIndicator(),
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox()
         ],
       ),
     );

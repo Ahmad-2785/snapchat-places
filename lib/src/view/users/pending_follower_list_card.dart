@@ -25,10 +25,10 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
   late StreamSubscription<DatabaseEvent> _sub;
   @override
   void initState() {
-    super.initState();
     Future.delayed(Duration.zero, () {
       getUserInfo();
     });
+    super.initState();
   }
 
   @override
