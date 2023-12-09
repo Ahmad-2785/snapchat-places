@@ -188,9 +188,9 @@ class _SettingsState extends State<Settings> {
                                 style: Theme.of(context).textTheme.labelMedium,
                               ),
                               Switch(
-                                  inactiveTrackColor:
+                                  activeTrackColor:
                                       Theme.of(context).colorScheme.primary,
-                                  activeTrackColor: const Color(0xFFC5C9CC),
+                                  inactiveTrackColor: const Color(0xFFC5C9CC),
                                   value: appState.isDarkMode,
                                   onChanged: (bool value) {
                                     appState.updateTheme(value);

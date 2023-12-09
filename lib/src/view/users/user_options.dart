@@ -108,7 +108,7 @@ class _UserOptionsState extends State<UserOptions> {
         .equalTo(userKey)
         .onValue
         .listen(getFollowers);
-
+    // get stories data
     final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
     DatabaseReference usersRef = databaseReference.child('Stories');
     DatabaseEvent event =
@@ -121,8 +121,6 @@ class _UserOptionsState extends State<UserOptions> {
         stories.add(value);
       });
     }
-    print(">>>>>>");
-    print(stories);
 
     setState(() {
       _stories = stories;
@@ -285,9 +283,9 @@ class _UserOptionsState extends State<UserOptions> {
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Switch(
-                            inactiveTrackColor:
+                            activeTrackColor:
                                 Theme.of(context).colorScheme.primary,
-                            activeTrackColor: const Color(0xFFC5C9CC),
+                            inactiveTrackColor: const Color(0xFFC5C9CC),
                             value: _isPublic,
                             onChanged: setPrivacy)
                       ],
@@ -298,79 +296,97 @@ class _UserOptionsState extends State<UserOptions> {
                       width: double.infinity,
                       padding: const EdgeInsets.only(
                           left: 20, right: 20, top: 0, bottom: 20),
-                      child: FutureBuilder<List<Map>>(
-                        future: Future.value(_stories),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return GridView.builder(
-                                itemCount: snapshot.data?.length,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 3,
-                                        childAspectRatio: 0.6),
-                                itemBuilder: (context, index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 8, right: 8, bottom: 16, top: 0),
-                                    child: snapshot.data![index]
-                                                ['contentType'] ==
-                                            'image/jpeg'
-                                        ? GestureDetector(
-                                            onTap: () {
-                                              Get.toNamed(Routes.imageDisplay,
-                                                  arguments: {
-                                                    'placeData':
-                                                        snapshot.data![index],
-                                                  });
-                                            },
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                image: DecorationImage(
-                                                    image: NetworkImage(snapshot
-                                                        .data![index]['url']),
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                          )
-                                        : GestureDetector(
-                                            onTap: () {
-                                              Get.toNamed(
-                                                  Routes.videoDisplay,
-                                                  arguments: {
-                                                    'placeData': snapshot
-                                                        .data![index],
-                                                  });
-                                            },
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              clipBehavior: Clip.antiAlias,
-                                              child: Stack(
-                                                alignment: Alignment.bottomLeft,
-                                                children: [
-                                                  VideoPlay(
-                                                      pathh: snapshot
-                                                          .data![index]['url']),
-                                                  const Icon(
-                                                    Icons.play_arrow,
-                                                    size: 20,
-                                                    color: Colors.white,
+                      child: _stories.isNotEmpty
+                          ? FutureBuilder<List<Map>>(
+                              future: Future.value(_stories),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return GridView.builder(
+                                      itemCount: snapshot.data?.length,
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: 3,
+                                              childAspectRatio: 0.6),
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 8,
+                                              right: 8,
+                                              bottom: 16,
+                                              top: 0),
+                                          child: snapshot.data![index]
+                                                      ['contentType'] ==
+                                                  'image/jpeg'
+                                              ? GestureDetector(
+                                                  onTap: () {
+                                                    Get.toNamed(
+                                                        Routes.imageDisplay,
+                                                        arguments: {
+                                                          'placeData': snapshot
+                                                              .data![index],
+                                                        });
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      image: DecorationImage(
+                                                          image: NetworkImage(
+                                                              snapshot.data![
+                                                                      index]
+                                                                  ['url']),
+                                                          fit: BoxFit.cover),
+                                                    ),
                                                   ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                  );
-                                });
-                          }
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        },
-                      ),
+                                                )
+                                              : GestureDetector(
+                                                  onTap: () {
+                                                    Get.toNamed(
+                                                        Routes.videoDisplay,
+                                                        arguments: {
+                                                          'placeData': snapshot
+                                                              .data![index],
+                                                        });
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    clipBehavior:
+                                                        Clip.antiAlias,
+                                                    child: Stack(
+                                                      alignment:
+                                                          Alignment.bottomLeft,
+                                                      children: [
+                                                        VideoPlay(
+                                                            pathh: snapshot
+                                                                    .data![
+                                                                index]['url']),
+                                                        const Icon(
+                                                          Icons.play_arrow,
+                                                          size: 20,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                        );
+                                      });
+                                }
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              },
+                            )
+                          : Center(
+                              child: Text(
+                                "There is no story",
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ),
                     ),
                   ),
                 ],

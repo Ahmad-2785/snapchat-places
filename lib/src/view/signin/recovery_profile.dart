@@ -195,10 +195,12 @@ class _RecoveryProfileState extends State<RecoveryProfile> {
       DataSnapshot snapshot = event.snapshot;
       dynamic snapshotValue = snapshot.value;
       var user = {};
+      var userKey = "";
       if (snapshotValue is Map) {
         snapshotValue.forEach((key, value) {
           if (value['password'] == password) {
             user = value;
+            userKey = key;
           }
         });
       }
@@ -240,7 +242,12 @@ class _RecoveryProfileState extends State<RecoveryProfile> {
         'avatar': user['avatar'],
         'isPublic': user['isPublic'],
       };
-      newEntryRef.set(newData).then((_) {
+      databaseReference
+          .child('Users')
+          .child(userKey)
+          .remove()
+          .then((_) => {newEntryRef.set(newData)})
+          .then((_) {
         UserPref.setUser(newEntryRef.key ?? "", uid, username, user['avatar'],
             user['isPublic']);
         Get.offAll(() => const HomePage());

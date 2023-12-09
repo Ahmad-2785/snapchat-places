@@ -107,6 +107,48 @@ class _FollowingsState extends State<Followings> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
+                      _selectedIndex = 2;
+                    });
+                  },
+                  child: Container(
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                            width: 1,
+                            color: _selectedIndex == 2
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .tertiaryContainer
+                                : Theme.of(context).colorScheme.onTertiary),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Followings',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _selectedIndex == 2
+                              ? Theme.of(context).colorScheme.tertiaryContainer
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onTertiaryContainer,
+                          fontSize: 16,
+                          fontFamily: 'Lato',
+                          fontWeight: FontWeight.w600,
+                          height: 0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
                       _selectedIndex = 1;
                     });
                   },
@@ -179,48 +221,6 @@ class _FollowingsState extends State<Followings> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 2;
-                    });
-                  },
-                  child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                            width: 1,
-                            color: _selectedIndex == 2
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer
-                                : Theme.of(context).colorScheme.onTertiary),
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Followings',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _selectedIndex == 2
-                              ? Theme.of(context).colorScheme.tertiaryContainer
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onTertiaryContainer,
-                          fontSize: 16,
-                          fontFamily: 'Lato',
-                          fontWeight: FontWeight.w600,
-                          height: 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
                       _selectedIndex = 3;
                     });
                   },
@@ -264,8 +264,8 @@ class _FollowingsState extends State<Followings> {
           Expanded(
             child: <Widget>[
               FollowersLists(followers: widget.followers),
-              PendingFollowersLists(pendingFollowers: widget.pendingFollowers),
               FollowingsLists(followings: widget.followings),
+              PendingFollowersLists(pendingFollowers: widget.pendingFollowers),
               PendingFollowingsLists(
                   pendingFollowings: widget.pendingFollowings),
             ][_selectedIndex],
