@@ -1,7 +1,6 @@
 {
   "project_info": {
     "project_number": "690049084643",
-    "firebase_url": "https://snapchat-f69ac-default-rtdb.firebaseio.com",
     "project_id": "snapchat-f69ac",
     "storage_bucket": "snapchat-f69ac.appspot.com"
   },
@@ -23,7 +22,7 @@
           }
         },
         {
-          "client_id": "690049084643-09na1u43kbgv01vs18geenev85f48a86.apps.googleusercontent.com",
+          "client_id": "690049084643-cdtjmo4026vie2nhbl7pkvf31q7i8629.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -36,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "690049084643-09na1u43kbgv01vs18geenev85f48a86.apps.googleusercontent.com",
+              "client_id": "690049084643-cdtjmo4026vie2nhbl7pkvf31q7i8629.apps.googleusercontent.com",
               "client_type": 3
             },
             {

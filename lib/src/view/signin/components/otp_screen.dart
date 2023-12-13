@@ -352,9 +352,9 @@ class _OtpScreenState extends State<OtpScreen> {
               height: 0,
             ),
           ),
-          const Text(
-            'Verification code is invalid, please try again',
-            style: TextStyle(
+          Text(
+            e.message ?? 'Verification code is invalid, please try again',
+            style: const TextStyle(
               color: Color(0xFF566067),
               fontSize: 14,
               fontFamily: 'Lato',

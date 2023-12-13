@@ -13,7 +13,7 @@ class Utils {
       backgroundColor: color,
       titleText: title,
       isDismissible: true,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 4000),
       icon: icon,
       borderColor: borderColor,
       messageText: message,

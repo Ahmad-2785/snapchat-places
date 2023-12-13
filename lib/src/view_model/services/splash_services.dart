@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapchat/src/view/home/home.dart';
@@ -26,19 +25,6 @@ class SplashServices {
     if (myKey == null) {
       Get.off(() => const CompleteProfile());
       return;
-    }
-
-    //get user data
-    String? userUid;
-    DatabaseReference ref = FirebaseDatabase.instance.ref().child('Users');
-    DataSnapshot snapshot = await ref.child(myKey).get();
-    final user = snapshot.value;
-    if (user is Map) {
-      userUid = user['uid'];
-    }
-    if (userUid == null) {
-      prefs.clear();
-      Get.off(() => const SignIn());
     }
   }
 }

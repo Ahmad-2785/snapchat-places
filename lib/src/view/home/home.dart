@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:camera/camera.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -12,9 +13,11 @@ import 'package:snapchat/src/data/model/place_details_model.dart';
 import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/util/reusable_methods.dart';
+import 'package:snapchat/src/util/utils.dart';
 import 'package:snapchat/src/view/home/business_card.dart';
 import 'package:snapchat/src/view/home/camera_screen.dart';
 import 'package:snapchat/src/view/home/place_search_menu.dart';
+import 'package:snapchat/src/view/signin/sign_in.dart';
 
 import '../../../constants/file_constants.dart';
 import '../../view_model/services/splash_services.dart';
@@ -27,8 +30,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isLoading = true;
   List _pendingFollowers = [];
-  late StreamSubscription<DatabaseEvent> _sub1;
+  StreamSubscription<DatabaseEvent>? _sub1;
+  StreamSubscription<DatabaseEvent>? _sub2;
   Map<String, Location> receivedLocation =
       Get.arguments ?? {"location": Location(lat: 0, lng: 0)};
   int _selectedIndex = 0;
@@ -37,13 +42,84 @@ class _HomePageState extends State<HomePage> {
   late GoogleMapController _mapController;
   String _mapStyle = "";
   final Set<Marker> _showMarkers = {};
-
   CameraPosition currentPos = const CameraPosition(
     target: LatLng(0, 0),
     zoom: 15,
   );
   LatLng _myLocation = const LatLng(0, 0);
   String _takePhotoPlaceId = "";
+
+  @override
+  void initState() {
+    SplashServices.checkProfile();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      rootBundle.loadString(FileConstants.mapStyle).then((string) {
+        _mapStyle = string;
+      });
+    });
+    Timer(const Duration(milliseconds: 1000), () {
+      goMyLocation();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _sub1?.cancel();
+    _sub2?.cancel();
+    super.dispose();
+  }
+
+  void goMyLocation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userKey = prefs.getString("USERKEY");
+    StreamSubscription<DatabaseEvent> sub1 = FirebaseDatabase.instance
+        .ref()
+        .child('Followings')
+        .orderByChild('following')
+        .equalTo(userKey)
+        .onValue
+        .listen(getFollowers);
+
+    StreamSubscription<DatabaseEvent> sub2 = FirebaseDatabase.instance
+        .ref()
+        .child('Users')
+        .child(userKey!)
+        .onValue
+        .listen(checkUser);
+
+    final mylocation = await PlacesServices.determinePosition();
+    if (receivedLocation['location']!.lat == 0) {
+      await _mapController.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: LatLng(mylocation.latitude, mylocation.longitude),
+              zoom: _zoom)));
+      Marker myLocationMarker = await PlacesServices.getSpecialMarker(
+          true, mylocation.latitude, mylocation.longitude);
+      setState(() {
+        _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
+        _showMarkers.add(myLocationMarker);
+      });
+    } else {
+      await _mapController.moveCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              target: LatLng(receivedLocation['location']!.lat,
+                  receivedLocation['location']!.lng),
+              zoom: 19)));
+      Marker newMarker = await PlacesServices.getSpecialMarker(false,
+          receivedLocation['location']!.lat, receivedLocation['location']!.lng);
+      Marker myLocationMarker = await PlacesServices.getSpecialMarker(
+          true, mylocation.latitude, mylocation.longitude);
+      setState(() {
+        _sub1 = sub1;
+        _sub2 = sub2;
+        _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
+        _showMarkers.add(newMarker);
+        _showMarkers.add(myLocationMarker);
+      });
+    }
+  }
+
   void updateMarkers(CameraPosition position) async {
     double distance = calculateDistance(
       currentPos.target.latitude,
@@ -94,64 +170,80 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void goMyLocation() async {
+  checkUser(DatabaseEvent event) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userKey = prefs.getString("USERKEY");
-    StreamSubscription<DatabaseEvent> sub1 = FirebaseDatabase.instance
-        .ref()
-        .child('Followings')
-        .orderByChild('following')
-        .equalTo(userKey)
-        .onValue
-        .listen(getFollowers);
-
-    final mylocation = await PlacesServices.determinePosition();
-    if (receivedLocation['location']!.lat == 0) {
-      await _mapController.moveCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-              target: LatLng(mylocation.latitude, mylocation.longitude),
-              zoom: _zoom)));
-      Marker myLocationMarker = await PlacesServices.getSpecialMarker(
-          true, mylocation.latitude, mylocation.longitude);
-      setState(() {
-        _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
-        _showMarkers.add(myLocationMarker);
-      });
-    } else {
-      await _mapController.moveCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-              target: LatLng(receivedLocation['location']!.lat,
-                  receivedLocation['location']!.lng),
-              zoom: 19)));
-      Marker newMarker = await PlacesServices.getSpecialMarker(false,
-          receivedLocation['location']!.lat, receivedLocation['location']!.lng);
-      Marker myLocationMarker = await PlacesServices.getSpecialMarker(
-          true, mylocation.latitude, mylocation.longitude);
-      setState(() {
-        _sub1 = sub1;
-        _myLocation = LatLng(mylocation.latitude, mylocation.longitude);
-        _showMarkers.add(newMarker);
-        _showMarkers.add(myLocationMarker);
-      });
+    var user = event.snapshot.value;
+    String? userUid;
+    bool? disabled;
+    if (user is Map) {
+      userUid = user['uid'];
+      disabled = user['disabled'];
     }
-  }
+    if (userUid == null) {
+      prefs.clear();
+      Utils.showSnackBar(
+          const Text(
+            'Account Issue',
+            style: TextStyle(
+              color: Color(0xFF0F1D27),
+              fontSize: 18,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w600,
+              height: 0,
+            ),
+          ),
+          const Text(
+            'User Account is Deleted by Administrator',
+            style: TextStyle(
+              color: Color(0xFF566067),
+              fontSize: 14,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          ),
+          const Icon(
+            IconData(0xe237, fontFamily: 'MaterialIcons'),
+            color: Color(0xFFFD363B),
+            size: 20,
+          ),
+          color: const Color(0xFFFFEBEB),
+          borderColor: const Color(0xFFFD363B));
 
-  @override
-  void initState() {
-    SplashServices.checkProfile();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      rootBundle.loadString(FileConstants.mapStyle).then((string) {
-        _mapStyle = string;
-      });
-    });
-    goMyLocation();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _sub1.cancel();
-    super.dispose();
+      Get.off(() => const SignIn());
+    }
+    if (disabled == true) {
+      prefs.clear();
+      Utils.showSnackBar(
+          const Text(
+            'Account Issue',
+            style: TextStyle(
+              color: Color(0xFF0F1D27),
+              fontSize: 18,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w600,
+              height: 0,
+            ),
+          ),
+          const Text(
+            'User Account is Disabled by Administrator',
+            style: TextStyle(
+              color: Color(0xFF566067),
+              fontSize: 14,
+              fontFamily: 'Lato',
+              fontWeight: FontWeight.w400,
+              height: 0,
+            ),
+          ),
+          const Icon(
+            IconData(0xe237, fontFamily: 'MaterialIcons'),
+            color: Color(0xFFFD363B),
+            size: 20,
+          ),
+          color: const Color(0xFFFFEBEB),
+          borderColor: const Color(0xFFFD363B));
+      Get.off(() => const SignIn());
+    }
   }
 
   @override

@@ -439,6 +439,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
         'password': password,
         'avatar': downloadURL,
         'isPublic': true,
+        'disabled': false,
       };
       String userKey = newEntryRef.key ?? "";
       newEntryRef.set(newData).then((_) {
