@@ -16,7 +16,7 @@ class PopupMenu extends StatelessWidget {
           child: Text("Second"),
         ),
       ],
-      offset: Offset(0, 40),
+      offset: const Offset(0, 40),
       onSelected: (value) {
         print("value:$value");
       },
@@ -35,8 +35,8 @@ class PopupMenu extends StatelessWidget {
               width: 20,
               height: 20,
               clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(),
-              child: Icon(
+              decoration: const BoxDecoration(),
+              child: const Icon(
                 Icons.settings_outlined,
                 size: 20,
                 color: Colors.white,

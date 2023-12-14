@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 InputDecoration CustomInputDecoration(String hintText, Icon prefixIcon,
     {fillColor = const Color(0xFFF8F9F9)}) {
   return InputDecoration(
-    contentPadding: EdgeInsets.all(14),
+    contentPadding: const EdgeInsets.all(14),
     prefix: Transform(
       transform: Matrix4.identity()
         ..translate(0.0, 3.0)
@@ -22,7 +22,7 @@ InputDecoration CustomInputDecoration(String hintText, Icon prefixIcon,
       ),
     ),
     hintText: hintText,
-    errorStyle: TextStyle(color: Color(0xFFFD363B)),
+    errorStyle: const TextStyle(color: Color(0xFFFD363B)),
     prefixIcon: prefixIcon,
     hintStyle: const TextStyle(
       color: Color(0xFFA7ACAF),

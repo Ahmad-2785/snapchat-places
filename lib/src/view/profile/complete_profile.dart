@@ -341,10 +341,10 @@ class _CompleteProfileState extends State<CompleteProfile> {
           isLoading
               ? Positioned.fill(
                   child: Container(
-                    color: Color(0xFF8B9296).withOpacity(0.8),
+                    color: const Color(0xFF8B9296).withOpacity(0.8),
                     child: Center(
                       child: Container(
-                        padding: EdgeInsets.all(30),
+                        padding: const EdgeInsets.all(30),
                         width: 100,
                         height: 100,
                         decoration: ShapeDecoration(
@@ -354,12 +354,12 @@ class _CompleteProfileState extends State<CompleteProfile> {
                             borderRadius: BorderRadius.circular(24),
                           ),
                         ),
-                        child: CircularProgressIndicator(),
+                        child: const CircularProgressIndicator(),
                       ),
                     ),
                   ),
                 )
-              : SizedBox()
+              : const SizedBox()
         ],
       ),
     );

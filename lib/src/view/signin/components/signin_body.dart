@@ -29,8 +29,8 @@ class _SignInBodyState extends State<SignInBody> {
 
     FirebaseAuth auth = FirebaseAuth.instance;
     // TextEditingController otpController = TextEditingController();
-    String _phoneNumber = '';
-    int? _resendtoken;
+    String phoneNumber = '';
+    int? resendtoken;
 
     Future<void> getOtp({required String phoneNumber}) async {
       await auth.verifyPhoneNumber(
@@ -46,7 +46,7 @@ class _SignInBodyState extends State<SignInBody> {
             });
           },
           codeSent: (verificationID, int? resendtoken) async {
-            _resendtoken = resendtoken;
+            resendtoken = resendtoken;
 
             Map<String, dynamic> data = {
               'receivedID': verificationID,
@@ -58,7 +58,7 @@ class _SignInBodyState extends State<SignInBody> {
             });
             Get.toNamed(Routes.otpScreen, arguments: data);
           },
-          forceResendingToken: _resendtoken,
+          forceResendingToken: resendtoken,
           timeout: const Duration(seconds: 120),
           codeAutoRetrievalTimeout: (verificationID) async {
             setState(() {
@@ -75,7 +75,7 @@ class _SignInBodyState extends State<SignInBody> {
         setState(() {
           isLoading = true;
         });
-        getOtp(phoneNumber: _phoneNumber);
+        getOtp(phoneNumber: phoneNumber);
       } else {}
     }
 
@@ -200,7 +200,7 @@ class _SignInBodyState extends State<SignInBody> {
                       initialCountryCode: 'US',
                       onCountryChanged: (country) => country = country,
                       onChanged: (phone) {
-                        _phoneNumber = phone.completeNumber;
+                        phoneNumber = phone.completeNumber;
                         if (phone.number.length >= country.minLength &&
                             phone.number.length <= country.maxLength) {
                           isValid = true;
@@ -214,7 +214,7 @@ class _SignInBodyState extends State<SignInBody> {
                     ),
                     Container(
                       decoration: ShapeDecoration(
-                        color: Color.fromARGB(255, 41, 3, 255),
+                        color: const Color.fromARGB(255, 41, 3, 255),
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(
                               width: 1, color: Color(0xFFECEEEF)),
@@ -238,7 +238,7 @@ class _SignInBodyState extends State<SignInBody> {
                           onPressed: () {
                             submit();
                           },
-                          style: ButtonStyle(
+                          style: const ButtonStyle(
                               backgroundColor:
                                   MaterialStatePropertyAll(Color(0xFF6155A6))),
                           child: const Text(
@@ -304,10 +304,10 @@ class _SignInBodyState extends State<SignInBody> {
         isLoading
             ? Positioned.fill(
                 child: Container(
-                  color: Color(0xFF8B9296).withOpacity(0.8),
+                  color: const Color(0xFF8B9296).withOpacity(0.8),
                   child: Center(
                     child: Container(
-                      padding: EdgeInsets.all(30),
+                      padding: const EdgeInsets.all(30),
                       width: 100,
                       height: 100,
                       decoration: ShapeDecoration(
@@ -317,12 +317,12 @@ class _SignInBodyState extends State<SignInBody> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                       ),
-                      child: CircularProgressIndicator(),
+                      child: const CircularProgressIndicator(),
                     ),
                   ),
                 ),
               )
-            : SizedBox()
+            : const SizedBox()
       ],
     );
   }

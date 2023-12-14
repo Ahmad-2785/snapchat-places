@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/util/utils.dart';
 import 'package:snapchat/src/view/profile/complete_profile.dart';
 import 'package:the_apple_sign_in/the_apple_sign_in.dart';

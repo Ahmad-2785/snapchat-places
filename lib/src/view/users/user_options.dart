@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snapchat/src/view/details/video_play.dart';
 import 'package:snapchat/src/view/users/followings.dart';
-import 'package:snapchat/src/view/users/image_display.dart';
 import 'package:snapchat/src/view/users/user_search_menu.dart';
 
 import '../../res/routes/routes.dart';

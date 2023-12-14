@@ -14,8 +14,8 @@ class GoogleApiService {
 
   Dio initApiServiceDio() {
     final baseOption = BaseOptions(
-      connectTimeout: Duration(seconds: 45 * 1000),
-      receiveTimeout: Duration(seconds: 45 * 1000),
+      connectTimeout: const Duration(seconds: 45 * 1000),
+      receiveTimeout: const Duration(seconds: 45 * 1000),
       baseUrl: 'https://maps.googleapis.com/maps/api/place/',
       contentType: 'application/json',
     );

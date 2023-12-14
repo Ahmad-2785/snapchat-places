@@ -296,7 +296,7 @@ class _UserDetailState extends State<UserDetail> {
                       child: GestureDetector(
                         onTap: followAction,
                         child: Container(
-                          padding: EdgeInsets.only(left: 50),
+                          padding: const EdgeInsets.only(left: 50),
                           child: CircleAvatar(
                             backgroundColor:
                                 Theme.of(context).colorScheme.tertiary,
