@@ -107,7 +107,7 @@ class _FollowingsState extends State<Followings> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 2;
+                      _selectedIndex = 1;
                     });
                   },
                   child: Container(
@@ -118,7 +118,7 @@ class _FollowingsState extends State<Followings> {
                       border: Border(
                         bottom: BorderSide(
                             width: 1,
-                            color: _selectedIndex == 2
+                            color: _selectedIndex == 1
                                 ? Theme.of(context)
                                     .colorScheme
                                     .tertiaryContainer
@@ -130,7 +130,7 @@ class _FollowingsState extends State<Followings> {
                         'Followings',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: _selectedIndex == 2
+                          color: _selectedIndex == 1
                               ? Theme.of(context).colorScheme.tertiaryContainer
                               : Theme.of(context)
                                   .colorScheme
@@ -149,7 +149,7 @@ class _FollowingsState extends State<Followings> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedIndex = 1;
+                      _selectedIndex = 2;
                     });
                   },
                   child: Container(
@@ -160,7 +160,7 @@ class _FollowingsState extends State<Followings> {
                       border: Border(
                         bottom: BorderSide(
                             width: 1,
-                            color: _selectedIndex == 1
+                            color: _selectedIndex == 2
                                 ? Theme.of(context)
                                     .colorScheme
                                     .tertiaryContainer
@@ -174,7 +174,7 @@ class _FollowingsState extends State<Followings> {
                             'Received',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: _selectedIndex == 1
+                              color: _selectedIndex == 2
                                   ? Theme.of(context)
                                       .colorScheme
                                       .tertiaryContainer

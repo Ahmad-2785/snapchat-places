@@ -15,6 +15,7 @@ class UserCard extends StatefulWidget {
 }
 
 class _UserCardState extends State<UserCard> {
+  bool _disbled = false;
   String followStatus = "unfollow";
   List _followers = [];
   bool isLoading = true;
@@ -27,6 +28,7 @@ class _UserCardState extends State<UserCard> {
   StreamSubscription<DatabaseEvent>? _sub2;
   StreamSubscription<DatabaseEvent>? _sub1;
   late StreamSubscription<DatabaseEvent> _sub3;
+  StreamSubscription<DatabaseEvent>? _sub4;
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
@@ -41,6 +43,7 @@ class _UserCardState extends State<UserCard> {
     _sub1?.cancel();
     _sub2?.cancel();
     _sub3.cancel();
+    _sub4?.cancel();
     super.dispose();
   }
 
@@ -65,6 +68,12 @@ class _UserCardState extends State<UserCard> {
         .child('isPublic')
         .onValue
         .listen(getPublicStatus);
+    // get disabled in realtime
+    StreamSubscription<DatabaseEvent> sub4 = ref
+        .child(widget.userKey)
+        .child('disabled')
+        .onValue
+        .listen(getDisbleStatus);
     // get follow status
     DatabaseReference followRef =
         FirebaseDatabase.instance.ref().child('Followings');
@@ -93,6 +102,7 @@ class _UserCardState extends State<UserCard> {
           .equalTo(widget.userKey)
           .onValue
           .listen(getFollowers);
+      _sub4 = sub4;
       _myKey = myKey;
       _username = username;
       _avatar = avatar;
@@ -184,6 +194,13 @@ class _UserCardState extends State<UserCard> {
     final data = event.snapshot.value;
     setState(() {
       _isPublic = data as bool;
+    });
+  }
+
+  getDisbleStatus(DatabaseEvent event) {
+    final data = event.snapshot.value;
+    setState(() {
+      _disbled = data as bool;
     });
   }
 
@@ -284,7 +301,9 @@ class _UserCardState extends State<UserCard> {
                                     EdgeInsets.only(right: 12, left: 12)),
                               ),
                               onPressed: () {
-                                followAction();
+                                if (!_disbled) {
+                                  followAction();
+                                }
                               },
                               icon: followStatus == "unfollow"
                                   ? const Icon(
@@ -329,15 +348,25 @@ class _UserCardState extends State<UserCard> {
                             height: 0.09,
                           ),
                         ),
-                        IconButton(
-                            onPressed: () {
-                              Get.toNamed(Routes.userDetail,
-                                  arguments: {'userKey': _userKey});
-                            },
-                            icon: Icon(
-                              Icons.remove_red_eye_outlined,
-                              color: Theme.of(context).colorScheme.onBackground,
-                            ))
+                        _disbled
+                            ? const Text("disabled", style: TextStyle(
+                            color:  Color(0xFFFD363B),
+                            fontSize: 14,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w400,
+                            height: 3,
+                          ),)
+                            : IconButton(
+                                onPressed: () {
+                                  Get.toNamed(Routes.userDetail,
+                                      arguments: {'userKey': _userKey});
+                                },
+                                icon: Icon(
+                                  Icons.remove_red_eye_outlined,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                ))
                       ],
                     ),
                   ],

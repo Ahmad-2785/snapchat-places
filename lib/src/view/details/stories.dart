@@ -6,9 +6,9 @@ import 'package:snapchat/src/view/details/video_play.dart';
 class Stories extends StatefulWidget {
   const Stories({
     super.key,
-    required this.storiesURLS,
+    required this.stories,
   });
-  final List<Map<String, String>> storiesURLS;
+  final List<Map> stories;
   @override
   State<Stories> createState() => _StoriesState();
 }
@@ -18,9 +18,9 @@ class _StoriesState extends State<Stories> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 12, top: 0),
-      child: widget.storiesURLS.isNotEmpty
-          ? FutureBuilder<List<Map<String, String>>>(
-              future: Future.value(widget.storiesURLS),
+      child: widget.stories.isNotEmpty
+          ? FutureBuilder<List<Map>>(
+              future: Future.value(widget.stories),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return GridView.builder(
@@ -32,13 +32,14 @@ class _StoriesState extends State<Stories> {
                         return Padding(
                           padding: const EdgeInsets.only(
                               left: 8, right: 8, bottom: 16, top: 0),
-                          child: snapshot.data![index]['type'] == 'image'
+                          child: snapshot.data![index]['value']
+                                      ['contentType'] ==
+                                  'image/jpeg'
                               ? GestureDetector(
                                   onTap: () {
                                     Get.toNamed(Routes.imageDetailView,
                                         arguments: {
-                                          'path': snapshot.data![index]
-                                              ['download'],
+                                          'data': snapshot.data![index],
                                         });
                                   },
                                   child: Container(
@@ -47,15 +48,14 @@ class _StoriesState extends State<Stories> {
                                               BorderRadius.circular(8),
                                           image: DecorationImage(
                                               image: NetworkImage(snapshot
-                                                  .data![index]['download']!),
+                                                  .data![index]['value']['url']!),
                                               fit: BoxFit.cover))),
                                 )
                               : GestureDetector(
                                   onTap: () {
                                     Get.toNamed(Routes.videoDetailView,
                                         arguments: {
-                                          'path': snapshot.data![index]
-                                              ['download'],
+                                          'data': snapshot.data![index],
                                         });
                                   },
                                   child: Container(
@@ -68,7 +68,7 @@ class _StoriesState extends State<Stories> {
                                       children: [
                                         VideoPlay(
                                             pathh: snapshot.data![index]
-                                                ['download']),
+                                                ['value']['url']),
                                         const Icon(
                                           Icons.play_arrow,
                                           size: 20,

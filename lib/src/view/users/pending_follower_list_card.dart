@@ -8,7 +8,7 @@ import 'package:snapchat/src/res/routes/routes.dart';
 
 class PendingFollowersListsCard extends StatefulWidget {
   const PendingFollowersListsCard({super.key, required this.userKey});
-  final userKey;
+  final String userKey;
 
   @override
   State<PendingFollowersListsCard> createState() =>
@@ -16,6 +16,7 @@ class PendingFollowersListsCard extends StatefulWidget {
 }
 
 class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
+  bool _disbled = false;
   bool isLoading = true;
   String _myKey = "";
   String _userKey = "";
@@ -23,6 +24,7 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
   String _avatar = "";
   bool _isPublic = true;
   late StreamSubscription<DatabaseEvent> _sub;
+  StreamSubscription<DatabaseEvent>? _sub4;
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
@@ -34,6 +36,7 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
   @override
   void dispose() {
     _sub.cancel();
+    _sub4?.cancel();
     super.dispose();
   }
 
@@ -58,7 +61,14 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
         .child('isPublic')
         .onValue
         .listen(getPublicStatus);
+    // get disabled in realtime
+    StreamSubscription<DatabaseEvent> sub4 = ref
+        .child(widget.userKey)
+        .child('disabled')
+        .onValue
+        .listen(getDisbleStatus);
     setState(() {
+      _sub4 = sub4;
       _sub = sub;
       _myKey = myKey;
       _username = username;
@@ -72,6 +82,13 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
     final data = event.snapshot.value;
     setState(() {
       _isPublic = data as bool;
+    });
+  }
+
+  getDisbleStatus(DatabaseEvent event) {
+    final data = event.snapshot.value;
+    setState(() {
+      _disbled = data as bool;
     });
   }
 
@@ -143,52 +160,57 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
                         const SizedBox(
                           width: 36,
                         ),
-                        Container(
-                          decoration: ShapeDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                  width: 1,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSecondary),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            shadows: const [
-                              BoxShadow(
-                                color: Color(0x05000000),
-                                blurRadius: 16,
-                                offset: Offset(0, 4),
-                                spreadRadius: -4,
-                              )
-                            ],
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          height: 30,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(30),
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStatePropertyAll(
-                                    Theme.of(context).colorScheme.primary),
-                                padding: const MaterialStatePropertyAll<
-                                        EdgeInsetsGeometry>(
-                                    EdgeInsets.only(right: 14, left: 14)),
-                              ),
-                              onPressed: accept,
-                              child: const Text(
-                                "Accept",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Inter',
-                                  fontWeight: FontWeight.w500,
+                        _disbled
+                            ? const SizedBox()
+                            : Container(
+                                decoration: ShapeDecoration(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        width: 1,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSecondary),
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  shadows: const [
+                                    BoxShadow(
+                                      color: Color(0x05000000),
+                                      blurRadius: 16,
+                                      offset: Offset(0, 4),
+                                      spreadRadius: -4,
+                                    )
+                                  ],
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                height: 30,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: ElevatedButton(
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                      padding: const MaterialStatePropertyAll<
+                                              EdgeInsetsGeometry>(
+                                          EdgeInsets.only(right: 14, left: 14)),
+                                    ),
+                                    onPressed: accept,
+                                    child: const Text(
+                                      "Accept",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'Inter',
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                     Row(
@@ -208,15 +230,28 @@ class _PendingFollowersListsCardState extends State<PendingFollowersListsCard> {
                             height: 0.09,
                           ),
                         ),
-                        IconButton(
-                            onPressed: () {
-                              Get.toNamed(Routes.userDetail,
-                                  arguments: {'userKey': _userKey});
-                            },
-                            icon: Icon(
-                              Icons.remove_red_eye_outlined,
-                              color: Theme.of(context).colorScheme.onBackground,
-                            )),
+                        _disbled
+                            ? const Text(
+                                "disabled",
+                                style: TextStyle(
+                                  color: Color(0xFFFD363B),
+                                  fontSize: 14,
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w400,
+                                  height: 3,
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  Get.toNamed(Routes.userDetail,
+                                      arguments: {'userKey': _userKey});
+                                },
+                                icon: Icon(
+                                  Icons.remove_red_eye_outlined,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                )),
                         Container(
                           decoration: ShapeDecoration(
                             color: Theme.of(context).colorScheme.secondary,

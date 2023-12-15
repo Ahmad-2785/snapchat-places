@@ -12,7 +12,10 @@ class UserServices {
     List<String> userKeys = [];
     if (snapshotValue is Map) {
       snapshotValue.forEach((key, value) {
-        if (value['username'] != username) {
+        print(">>>>>>>>");
+        print(value['disabled']);
+        print(value['username']);
+        if (value['username'] != username && value['disabled'] == false ) {
           userKeys.add(key);
         }
       });

@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,18 +7,15 @@ import 'package:snapchat/src/data/google_map/places_services.dart';
 import 'package:snapchat/src/data/model/place_details_model.dart';
 import 'package:snapchat/src/res/routes/routes.dart';
 import 'package:snapchat/src/view/details/stories.dart';
-import 'package:snapchat/src/view/details/working_hours.dart';
+import 'working_hours.dart';
 
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
-
   @override
   State<DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<DetailPage> {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  late String _username;
   late bool isLoading;
   late int follow;
   late bool isFollowed;
@@ -26,43 +23,85 @@ class _DetailPageState extends State<DetailPage> {
   int selectedIndex = 0;
   String placeId = "";
   String formattedAddress = "";
-  List<Map<String, String>> storiesURLS = [];
+  List<Map> _stories = [];
   Map<String, dynamic> displayName = {"text": "", "languageCode": "en"};
   List photos = [];
   Location location = Location(lat: 0, lng: 0);
   String photoUri = "";
   bool openNow = true;
   List<dynamic> weekdayDescriptions = [];
+  StreamSubscription<DatabaseEvent>? _sub;
+  StreamSubscription<DatabaseEvent>? _sub1;
+  String _userKey = "";
+  @override
+  void initState() {
+    isLoading = true;
+    placeId = arguments['placeID'];
+    getPlacedetails(arguments['placeID']);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    _sub1?.cancel();
+
+    super.dispose();
+  }
 
   void followAction() async {
     if (isFollowed == true) {
-      QuerySnapshot querySnapshot = await firestore
-          .collection('Following')
-          .where('username', isEqualTo: _username)
-          .where('placeId', isEqualTo: placeId)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.size > 0) {
-        await querySnapshot.docs.first.reference.delete();
-        setState(() {
-          isFollowed = false;
-          follow = follow - 1;
+      DatabaseReference followRef =
+          FirebaseDatabase.instance.ref().child('PlaceFollowings');
+      DatabaseEvent event =
+          await followRef.orderByChild('placeId').equalTo(placeId).once();
+      dynamic snapshotValue = event.snapshot.value;
+      if (snapshotValue is Map) {
+        snapshotValue.forEach((key, value) {
+          if (value['userKey'] == _userKey) {
+            FirebaseDatabase.instance
+                .ref()
+                .child('PlaceFollowings')
+                .child(key)
+                .remove();
+          }
         });
       }
     } else {
-      await firestore.collection('Following').add({
-        'username': _username,
+      DatabaseReference newEntryRef =
+          FirebaseDatabase.instance.ref().child('PlaceFollowings').push();
+      Map<String, dynamic> newData = {
+        'userKey': _userKey,
         'placeId': placeId,
-      });
-      setState(() {
-        isFollowed = true;
-        follow = follow + 1;
-      });
+      };
+      newEntryRef.set(newData);
     }
   }
 
+  getFollowings(DatabaseEvent event) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final userKey = pref.getString("USERKEY") ?? "";
+    var value = event.snapshot.value;
+    List followings = [];
+    List myFollowings = [];
+    if (value is Map) {
+      value.forEach((key, value) {
+        if (value['userKey'] == userKey) {
+          myFollowings.add(value['userKey']);
+        }
+        followings.add(value['userKey']);
+      });
+    }
+
+    setState(() {
+      follow = followings.length;
+      isFollowed = myFollowings.isNotEmpty;
+    });
+  }
+
   Future getPlacedetails(placeId) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final userKey = pref.getString("USERKEY") ?? "";
     //Get place Info from Google API
     final result = await PlacesServices.getPlaceDetails(placeId);
     if (result['photos'] == null) {
@@ -73,41 +112,32 @@ class _DetailPageState extends State<DetailPage> {
         photoUri = photo['photoUri'];
       });
     }
-    // Get following numbers
-    QuerySnapshot follows = await firestore
-        .collection(
-            'Following') // Replace "your_collection" with your actual collection name
-        .where('placeId', isEqualTo: placeId)
-        .get();
-    // Check if the user followed this pace
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String username = pref.getString('USERNAME') ?? "";
-    QuerySnapshot followed = await firestore
-        .collection('Following')
-        .where('username', isEqualTo: username)
-        .where('placeId', isEqualTo: placeId)
-        .get();
-    // Get Stories URLS from firestorage
-    final storageref =
-        FirebaseStorage.instance.ref().child('stories').child(placeId);
-    final ListResult results = await storageref.listAll();
-    final List<Reference> items = results.items;
-    final List<Map<String, String>> downloadURLS = [];
-    for (var i = 0; i < items.length; i++) {
-      final download = await items[i].getDownloadURL();
-      final metadata = await items[i].getMetadata();
-      final contentType = metadata.contentType;
+    // Get following numbers and isFollowed
+    StreamSubscription<DatabaseEvent> sub = FirebaseDatabase.instance
+        .ref()
+        .child('PlaceFollowings')
+        .orderByChild('placeId')
+        .equalTo(placeId)
+        .onValue
+        .listen(getFollowings);
 
-      downloadURLS.add({
-        'download': download,
-        'type': contentType?.startsWith('image/') == true ? 'image' : 'video'
+    // get stories data
+    final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+    DatabaseReference usersRef = databaseReference.child('Stories');
+    DatabaseEvent event =
+        await usersRef.orderByChild('placeId').equalTo(placeId).once();
+    DataSnapshot snapshot = event.snapshot;
+    dynamic snapshotValue = snapshot.value;
+    List<Map> stories = [];
+    if (snapshotValue is Map) {
+      snapshotValue.forEach((key, value) {
+        stories.add({'key': key, 'value': value});
       });
     }
     setState(() {
-      _username = username;
-      follow = follows.size;
-      isFollowed = followed.size > 0;
-      storiesURLS = downloadURLS;
+      _sub = sub;
+      _userKey = userKey;
+      _stories = stories;
       displayName = result['displayName'];
       formattedAddress = result['shortFormattedAddress'];
       location = Location(
@@ -122,14 +152,6 @@ class _DetailPageState extends State<DetailPage> {
       }
       isLoading = false;
     });
-  }
-
-  @override
-  void initState() {
-    isLoading = true;
-    placeId = arguments['placeID'];
-    getPlacedetails(arguments['placeID']);
-    super.initState();
   }
 
   @override
@@ -497,7 +519,7 @@ class _DetailPageState extends State<DetailPage> {
                   Expanded(
                     child: <Widget>[
                       Stories(
-                        storiesURLS: storiesURLS,
+                        stories: _stories,
                       ),
                       WorkingHours(weekdayDescriptions: weekdayDescriptions)
                     ][selectedIndex],
