@@ -70,15 +70,11 @@ class _VideoDetailViewState extends State<VideoDetailView> {
   }
 
   checckFollowStatus(DatabaseEvent event) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String userKey = prefs.getString("USERKEY") ?? "";
     var value = event.snapshot.value;
     List reportings = [];
     if (value is Map) {
       value.forEach((key, value) {
-        if (value['userKey'] == userKey) {
-          reportings.add(key);
-        }
+        reportings.add(key);
       });
     }
 
@@ -114,7 +110,7 @@ class _VideoDetailViewState extends State<VideoDetailView> {
                       child: Padding(
                         padding: EdgeInsets.all(50),
                         child: Text(
-                          "You reported this media",
+                          "This media is reported",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
